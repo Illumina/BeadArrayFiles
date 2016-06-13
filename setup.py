@@ -6,5 +6,5 @@ setup(
     author_email = 'ryankelley@illumina.com',
     packages = ['IlluminaBeadArrayFiles'],
     package_dir = {'IlluminaBeadArrayFiles' : 'module'},
-    version = '0.9.0'
+    version = '1.0.0'
 )

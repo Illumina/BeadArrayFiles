@@ -38,6 +38,7 @@ Class to encapsulate the meta-data collected in the GTC file for a scanner instr
 Class for parsing a binary (BPM) manifest file. This class can be used to recover the in-order list of loci names in a given manifest, which is necessary to associate the genotype information present in the GTC file to a specific locus name. 
 
 
-
+## Compatibility
+This library is compatible with Python 2.7 and was tested with Python 2.7.11
 
 

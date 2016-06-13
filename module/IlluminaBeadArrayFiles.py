@@ -1,4 +1,4 @@
-##    Copyright (c) 2015, Illumina
+##    Copyright (c) 2016, Illumina
 ##    All rights reserved.
 ##
 ##    Redistribution and use in source and binary forms, with or without
@@ -29,53 +29,59 @@ import struct
 from math import cos,sin,pi,atan2
 
 
-code2genotype = []
-code2genotype.append("NC")
-code2genotype.append("AA")
-code2genotype.append("AB")
-code2genotype.append("BB")
-code2genotype.append("NULL")
-code2genotype.append("A")
-code2genotype.append("B")
-code2genotype.append("AAA")
-code2genotype.append("AAB")
-code2genotype.append("ABB")
-code2genotype.append("BBB")
-code2genotype.append("AAAA")
-code2genotype.append("AAAB")
-code2genotype.append("AABB")
-code2genotype.append("ABBB")
-code2genotype.append("BBBB")
-code2genotype.append("AAAAA")
-code2genotype.append("AAAAB")
-code2genotype.append("AAABB")
-code2genotype.append("AABBB")
-code2genotype.append("ABBBB")
-code2genotype.append("BBBBB")
-code2genotype.append("AAAAAA")
-code2genotype.append("AAAAAB")
-code2genotype.append("AAAABB")
-code2genotype.append("AAABBB")
-code2genotype.append("AABBBB")
-code2genotype.append("ABBBBB")
-code2genotype.append("BBBBBB")
-code2genotype.append("AAAAAAA")
-code2genotype.append("AAAAAAB")
-code2genotype.append("AAAAABB")
-code2genotype.append("AAAABBB")
-code2genotype.append("AAABBBB")
-code2genotype.append("AABBBBB")
-code2genotype.append("ABBBBBB")
-code2genotype.append("BBBBBBB")
-code2genotype.append("AAAAAAAA")
-code2genotype.append("AAAAAAAB")
-code2genotype.append("AAAAAABB")
-code2genotype.append("AAAAABBB")
-code2genotype.append("AAAABBBB")
-code2genotype.append("AAABBBBB")
-code2genotype.append("AABBBBBB")
-code2genotype.append("ABBBBBBB")
-code2genotype.append("BBBBBBBB")
+code2genotype = [
+"NC",
+"AA",
+"AB",
+"BB",
+"NULL",
+"A",
+"B",
+"AAA",
+"AAB",
+"ABB",
+"BBB",
+"AAAA",
+"AAAB",
+"AABB",
+"ABBB",
+"BBBB",
+"AAAAA",
+"AAAAB",
+"AAABB",
+"AABBB",
+"ABBBB",
+"BBBBB",
+"AAAAAA",
+"AAAAAB",
+"AAAABB",
+"AAABBB",
+"AABBBB",
+"ABBBBB",
+"BBBBBB",
+"AAAAAAA",
+"AAAAAAB",
+"AAAAABB",
+"AAAABBB",
+"AAABBBB",
+"AABBBBB",
+"ABBBBBB",
+"BBBBBBB",
+"AAAAAAAA",
+"AAAAAAAB",
+"AAAAAABB",
+"AAAAABBB",
+"AAAABBBB",
+"AAABBBBB",
+"AABBBBBB",
+"ABBBBBBB",
+"BBBBBBBB"
+]
+
+NC = chr(0)
+AA = chr(1)
+AB = chr(2)
+BB = chr(3)
 
 
 class GenotypeCalls:
@@ -85,36 +91,36 @@ class GenotypeCalls:
     Attributes:
         supported_versions: Supported file versions as a list of integers
     """
-    ID_NUM_SNPS = 1
-    ID_PLOIDY = 2
-    ID_PLOIDY_TYPE = 3
-    ID_SAMPLE_NAME = 10
-    ID_SAMPLE_PLATE = 11
-    ID_SAMPLE_WELL = 12
-    ID_CLUSTER_FILE = 100
-    ID_SNP_MANIFEST = 101
-    ID_IMAGING_DATE = 200
-    ID_AUTOCALL_DATE = 201
-    ID_AUTOCALL_VERSION = 300
-    ID_NORMALIZATION_TRANSFORMS = 400    
-    ID_CONTROLS_X = 500
-    ID_CONTROLS_Y = 501
-    ID_RAW_X = 1000
-    ID_RAW_Y = 1001
-    ID_GENOTYPES = 1002
-    ID_BASE_CALLS = 1003
-    ID_GENOTYPE_SCORES = 1004
-    ID_SCANNER_DATA = 1005
-    ID_CALL_RATE = 1006
-    ID_GENDER = 1007
-    ID_LOGR_DEV = 1008
-    ID_GC10 = 1009
-    ID_GC50 = 1011
-    ID_B_ALLELE_FREQS = 1012
-    ID_LOGR_RATIOS = 1013
-    ID_PERCENTILES_X = 1014
-    ID_PERCENTILES_Y = 1015
-    ID_SLIDE_IDENTIFIER = 1016
+    __ID_NUM_SNPS = 1
+    __ID_PLOIDY = 2
+    __ID_PLOIDY_TYPE = 3
+    __ID_SAMPLE_NAME = 10
+    __ID_SAMPLE_PLATE = 11
+    __ID_SAMPLE_WELL = 12
+    __ID_CLUSTER_FILE = 100
+    __ID_SNP_MANIFEST = 101
+    __ID_IMAGING_DATE = 200
+    __ID_AUTOCALL_DATE = 201
+    __ID_AUTOCALL_VERSION = 300
+    __ID_NORMALIZATION_TRANSFORMS = 400    
+    __ID_CONTROLS_X = 500
+    __ID_CONTROLS_Y = 501
+    __ID_RAW_X = 1000
+    __ID_RAW_Y = 1001
+    __ID_GENOTYPES = 1002
+    __ID_BASE_CALLS = 1003
+    __ID_GENOTYPE_SCORES = 1004
+    __ID_SCANNER_DATA = 1005
+    __ID_CALL_RATE = 1006
+    __ID_GENDER = 1007
+    __ID_LOGR_DEV = 1008
+    __ID_GC10 = 1009
+    __ID_GC50 = 1011
+    __ID_B_ALLELE_FREQS = 1012
+    __ID_LOGR_RATIOS = 1013
+    __ID_PERCENTILES_X = 1014
+    __ID_PERCENTILES_Y = 1015
+    __ID_SLIDE_IDENTIFIER = 1016
     
     supported_version = [3,4,5];
     def __init__(self, filename, ignore_version = False):
@@ -146,12 +152,12 @@ class GenotypeCalls:
                 (id, offset) = struct.unpack("<hI",gtc_handle.read(6))
                 self.toc_table[id] = offset
     
-    def get_generic(self, toc_entry, parse_function):
+    def __get_generic(self, toc_entry, parse_function):
         """Internal helper function to access a data element in a
         generic fashion.
 
         Args:
-            toc_entry (int): Identifer for entry in table of contents
+            toc_entry (int): Identifier for entry in table of contents
             parse_function (function): Used to parse the value
                                          from a file handle
         Returns:
@@ -162,12 +168,12 @@ class GenotypeCalls:
             gtc_handle.seek(self.toc_table[toc_entry])
             return parse_function(gtc_handle)
     
-    def get_generic_array(self, toc_entry, parse_function):
+    def __get_generic_array(self, toc_entry, parse_function):
         """Internal helper function to access a data array in a generic
         fashion.
 
         Args:
-            toc_entry (int): Identifer for entry in table of contents
+            toc_entry (int): Identifier for entry in table of contents
             parse_function (function): A function used to parse the value
                                          from a file handle
         Returns:
@@ -186,57 +192,57 @@ class GenotypeCalls:
         """Returns:
             The number of SNPs in the file as an integer 
         """
-        return self.toc_table[GenotypeCalls.ID_NUM_SNPS]
+        return self.toc_table[GenotypeCalls.__ID_NUM_SNPS]
 
     def get_ploidy(self):
         """Returns:
             The ploidy of the sample 
         """
-        return self.toc_table[GenotypeCalls.ID_PLOIDY]
+        return self.toc_table[GenotypeCalls.__ID_PLOIDY]
 
     def get_ploidy_type(self):
         """Returns:
             The ploidy of the sample 
         """
-        return self.toc_table[GenotypeCalls.ID_PLOIDY_TYPE]
+        return self.toc_table[GenotypeCalls.__ID_PLOIDY_TYPE]
         
     
     def get_sample_name(self):
         """Returns:
             The name of the sample as a string
         """
-        return self.get_generic(GenotypeCalls.ID_SAMPLE_NAME, read_string)
+        return self.__get_generic(GenotypeCalls.__ID_SAMPLE_NAME, read_string)
 
     def get_slide_identifier(self):
         """Returns:
             The name of the sample as a string
         """
-        return self.get_generic(GenotypeCalls.ID_SLIDE_IDENTIFIER, read_string)
+        return self.__get_generic(GenotypeCalls.__ID_SLIDE_IDENTIFIER, read_string)
 
 
     def get_sample_plate(self):
         """Returns:
             The name of the sample plate as a string
         """
-        return self.get_generic(GenotypeCalls.ID_SAMPLE_PLATE, read_string)
+        return self.__get_generic(GenotypeCalls.__ID_SAMPLE_PLATE, read_string)
 
     def get_sample_well(self):
         """Returns:
             The name of the sample well as a string
         """        
-        return self.get_generic(GenotypeCalls.ID_SAMPLE_WELL, read_string)
+        return self.__get_generic(GenotypeCalls.__ID_SAMPLE_WELL, read_string)
     
     def get_cluster_file(self):
         """Returns:
             The name of the cluster file used for genotyping as a string
         """    
-        return self.get_generic(GenotypeCalls.ID_CLUSTER_FILE, read_string)
+        return self.__get_generic(GenotypeCalls.__ID_CLUSTER_FILE, read_string)
 
     def get_snp_manifest(self):
         """Returns:
             The name of the manifest used for genotyping as a string
         """   
-        return self.get_generic(GenotypeCalls.ID_SNP_MANIFEST, read_string)
+        return self.__get_generic(GenotypeCalls.__ID_SNP_MANIFEST, read_string)
 
     def get_imaging_date(self):
         """Returns:
@@ -244,7 +250,7 @@ class GenotypeCalls:
             For example
                 Monday, December 01, 2014 4:51:47 PM
         """         
-        return self.get_generic(GenotypeCalls.ID_IMAGING_DATE, read_string)
+        return self.__get_generic(GenotypeCalls.__ID_IMAGING_DATE, read_string)
 
     def get_autocall_date(self):
         """Returns:
@@ -252,22 +258,22 @@ class GenotypeCalls:
             For example
                 2/17/2015 1:47 PM
         """         
-        return self.get_generic(GenotypeCalls.ID_AUTOCALL_DATE, read_string)
+        return self.__get_generic(GenotypeCalls.__ID_AUTOCALL_DATE, read_string)
 
     def get_autocall_version(self):
         """Returns:
-            The version of autocall used for genotyping as a string
+            The version of AutoCall used for genotyping as a string
             For example
                 1.6.2.2
         """
-        return self.get_generic(GenotypeCalls.ID_AUTOCALL_VERSION, read_string)
+        return self.__get_generic(GenotypeCalls.__ID_AUTOCALL_VERSION, read_string)
 
             
     def get_genotypes(self):
         """ Returns:
             A byte list (string) of genotypes. See code2genotype for mapping
         """
-        return self.get_generic_array(GenotypeCalls.ID_GENOTYPES, read_byte)
+        return self.__get_generic_array(GenotypeCalls.__ID_GENOTYPES, read_byte)
 
     def get_base_calls(self):
         """Returns:
@@ -284,7 +290,7 @@ class GenotypeCalls:
 		genotypes = self.get_genotypes()
 		
         with open(self.filename, "rb") as gtc_handle:
-            gtc_handle.seek(self.toc_table[GenotypeCalls.ID_BASE_CALLS])
+            gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_BASE_CALLS])
             num_entries = read_int(gtc_handle)
             result = []
             for idx in xrange(num_entries):
@@ -304,75 +310,75 @@ class GenotypeCalls:
         """Returns:
             The genotype scores as a list of floats
         """
-        return self.get_generic_array(GenotypeCalls.ID_GENOTYPE_SCORES, read_float)
+        return self.__get_generic_array(GenotypeCalls.__ID_GENOTYPE_SCORES, read_float)
 
     def get_scanner_data(self):
         """Returns:
             Information about scanner as ScannerData object
         """
-        return self.get_generic(GenotypeCalls.ID_SCANNER_DATA, read_scanner_data)
+        return self.__get_generic(GenotypeCalls.__ID_SCANNER_DATA, read_scanner_data)
 
     def get_control_x_intensities(self):
         """Returns:
-            The x intentensities of control bead types as a list of integers
+            The x intensities of control bead types as a list of integers
         """
-        return self.get_generic_array(GenotypeCalls.ID_CONTROLS_X, read_ushort)
+        return self.__get_generic_array(GenotypeCalls.__ID_CONTROLS_X, read_ushort)
     
     def get_control_y_intensities(self):
         """Returns:
-            The y intentensities of control bead types as a list of integers
+            The y intensities of control bead types as a list of integers
         """
-        return self.get_generic_array(GenotypeCalls.ID_CONTROLS_Y, read_ushort)
+        return self.__get_generic_array(GenotypeCalls.__ID_CONTROLS_Y, read_ushort)
 
     def get_raw_x_intensities(self):
         """Returns:
-            The raw x intentensities of assay bead types as a list of integers
+            The raw x intensities of assay bead types as a list of integers
         """
-        return self.get_generic_array(GenotypeCalls.ID_RAW_X, read_ushort)
+        return self.__get_generic_array(GenotypeCalls.__ID_RAW_X, read_ushort)
     
     def get_raw_y_intensities(self):
         """Returns:
-            The raw y intentensities of assay bead types as a list of integers
+            The raw y intensities of assay bead types as a list of integers
         """
-        return self.get_generic_array(GenotypeCalls.ID_RAW_Y, read_ushort)
+        return self.__get_generic_array(GenotypeCalls.__ID_RAW_Y, read_ushort)
 
     def get_call_rate(self):
         """Returns:
             The call rate as a float
         """
-        return self.get_generic(GenotypeCalls.ID_CALL_RATE, read_float)
+        return self.__get_generic(GenotypeCalls.__ID_CALL_RATE, read_float)
 
     def get_gender(self):
         """Returns:
             The gender as a char
             M - Male, F - Female, U-Unknown
         """
-        return self.get_generic(GenotypeCalls.ID_GENDER, read_char)
+        return self.__get_generic(GenotypeCalls.__ID_GENDER, read_char)
         
     def get_logr_dev(self):
         """Returns:
             The logR deviation as a float
         """        
-        return self.get_generic(GenotypeCalls.ID_LOGR_DEV, read_float)
+        return self.__get_generic(GenotypeCalls.__ID_LOGR_DEV, read_float)
 
     def get_gc10(self):
         """Returns:
-            The GC10 (gencall score - 10th percentile) as a float
+            The GC10 (GenCall score - 10th percentile) as a float
         """
-        return self.get_generic(GenotypeCalls.ID_GC10, read_float)
+        return self.__get_generic(GenotypeCalls.__ID_GC10, read_float)
 
     def get_gc50(self):
         """Returns:
-            The GC50 (gencall score - 50th percentile) as a float
+            The GC50 (GenCall score - 50th percentile) as a float
         """
-        return self.get_generic(GenotypeCalls.ID_GC50, read_float)
+        return self.__get_generic(GenotypeCalls.__ID_GC50, read_float)
 
     def get_num_calls(self):
         """Returns:
             The number of calls as an integer
         """
         with open(self.filename, "rb") as gtc_handle:
-            gtc_handle.seek(self.toc_table[GenotypeCalls.ID_GC50] + 4)
+            gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_GC50] + 4)
             return read_int(gtc_handle)
 
     def get_num_no_calls(self):
@@ -380,7 +386,7 @@ class GenotypeCalls:
             The number of no calls as an integer
         """
         with open(self.filename, "rb") as gtc_handle:
-            gtc_handle.seek(self.toc_table[GenotypeCalls.ID_GC50] + 8)
+            gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_GC50] + 8)
             return read_int(gtc_handle)
 
     def get_num_intensity_only(self):
@@ -388,7 +394,7 @@ class GenotypeCalls:
             The number of intensity only SNPs
         """
         with open(self.filename, "rb") as gtc_handle:
-            gtc_handle.seek(self.toc_table[GenotypeCalls.ID_GC50] + 12)
+            gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_GC50] + 12)
             return read_int(gtc_handle)
     
     def get_ballele_freqs(self):
@@ -396,16 +402,16 @@ class GenotypeCalls:
             The B allele frequencies as a list of floats
         """
         if self.version < 4:
-            raise Exception("B allele frequencies unavailable")
-        return self.get_generic_array(GenotypeCalls.ID_B_ALLELE_FREQS, read_float)
+            raise Exception("B allele frequencies unavailable in GTC File version ("+str(self.version)+")")
+        return self.__get_generic_array(GenotypeCalls.__ID_B_ALLELE_FREQS, read_float)
 
     def get_logr_ratios(self):
         """Returns:
             The logR ratios as a list of floats
         """        
         if self.version < 4:
-            raise Exception("LogR ratios unavailable")
-        return self.get_generic_array(GenotypeCalls.ID_LOGR_RATIOS, read_float)
+            raise Exception("LogR ratios unavailable in GTC File version ("+str(self.version)+")")
+        return self.__get_generic_array(GenotypeCalls.__ID_LOGR_RATIOS, read_float)
 
     def get_percentiles_x(self):
         """Returns:
@@ -413,10 +419,10 @@ class GenotypeCalls:
             x intensity
         """
         if self.version < 5:
-            raise Exception("Percentile intensities unavailable")
+            raise Exception("Percentile intensities unavailable in GTC File version ("+str(self.version)+")")
         result = []
         with open(self.filename, "rb") as gtc_handle:
-            gtc_handle.seek(self.toc_table[GenotypeCalls.ID_PERCENTILES_X])
+            gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_PERCENTILES_X])
             result = []
             for idx in xrange(3):
                 result.append(read_ushort(gtc_handle))
@@ -428,10 +434,10 @@ class GenotypeCalls:
             y intensity
         """
         if self.version < 5:
-            raise Exception("Percentile intensities unavailable")
+            raise Exception("Percentile intensities unavailable in GTC File version ("+str(self.version)+")")
         result = []
         with open(self.filename, "rb") as gtc_handle:
-            gtc_handle.seek(self.toc_table[GenotypeCalls.ID_PERCENTILES_Y])
+            gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_PERCENTILES_Y])
             result = []
             for idx in xrange(3):
                 result.append(read_ushort(gtc_handle))
@@ -453,14 +459,10 @@ class GenotypeCalls:
         """Returns:
             The normalization transforms used during genotyping (as a lit of NormalizationTransforms)
         """
-        return self.get_generic_array(GenotypeCalls.ID_NORMALIZATION_TRANSFORMS, NormalizationTransform.read_normalization_transform)
+        return self.__get_generic_array(GenotypeCalls.__ID_NORMALIZATION_TRANSFORMS, NormalizationTransform.read_normalization_transform)
     	
 
-NC = chr(0)
-AA = chr(1)
-AB = chr(2)
-BB = chr(3)
-GenotypeCardinality = 4
+
 
 class NormalizationTransform:
     def __init__(self, buffer):
@@ -484,13 +486,13 @@ class NormalizationTransform:
 
     @staticmethod
     def rect_to_polar((x,y)):
-        """Converts x,y intensities to (psuedo) polar co-ordinates (R, theta)
+        """Converts x,y intensities to (pseudo) polar co-ordinates (R, theta)
         Args:
             x,y (int,int): Raw x,y intensities for probe
         Returns:
             (R,theta) polar values as tuple of floats
         """
-        if x == 0 or y == 0:
+        if x == 0 and y == 0:
             return (float("nan"), float("nan"))
         return (x + y, atan2(y,x) * 2.0 / pi)
 
@@ -545,7 +547,7 @@ class BeadPoolManifest:
     Attributes:
         names (list of strings): Names of loci from manifest
         addresses (list of ints): AddressA IDs of loci from manifest
-        normalizatin_ids (list of ints): Normalization lookups from manifest. This indexes into
+        normalization_lookups (list of ints): Normalization lookups from manifest. This indexes into
                                          list of normalization transforms read from GTC file
         num_loci (int): Number of loci in manifest
         manifest_name (string): Name of manifest
@@ -566,9 +568,9 @@ class BeadPoolManifest:
         self.num_loci = 0
         self.manifest_name = ""
         self.control_config = ""
-        self.parse_file(filename)
+        self.__parse_file(filename)
 
-    def parse_file(self, manifest_file):
+    def __parse_file(self, manifest_file):
         """Helper function to initialize this object from a file.
         Args:
             manifest_file (string): Location of BPM (bead pool manifest) file
@@ -581,7 +583,7 @@ class BeadPoolManifest:
                 raise Exception("Invalid BPM format")
             version = read_byte(manifest_handle)
             if version != 1:
-                raise Exception("Uknown BPM version (" + str(ord(version)) + ")")
+                raise Exception("Unknown BPM version (" + str(ord(version)) + ")")
 
             version = read_int(manifest_handle)
             version_flag = 0x1000
@@ -632,8 +634,8 @@ class LocusEntry:
     6,7, and 8.
     Attributes:
         ilmn_id (string) : IlmnID (probe identifier) of locus
-        name (string): Name (variant identifer) of locus
-        assay_type (int) : Identifies type of assay (0 - InfII , 1 - InfI (A/T), 2 - InfI (G/C)
+        name (string): Name (variant identifier) of locus
+        assay_type (int) : Identifies type of assay (0 - Infinium II , 1 - Infinium I (A/T), 2 - Infinium I (G/C)
         address_a (int) : AddressA ID of locus
         address_b (int) : AddressB ID of locus (0 if none)
     """
@@ -649,29 +651,29 @@ class LocusEntry:
         self.assay_type = -1
         self.address_a = -1
         self.address_b = -1
-        self.parse_file(handle)
+        self.__parse_file(handle)
 
-    def parse_file(self, handle):
+    def __parse_file(self, handle):
         """Helper function to initialize this object from a file handle
         Args:
-            handle (file handle): File handle at start fo locus entry record
+            handle (file handle): File handle at start of locus entry record
         Returns:
             None
         """     
         version = read_int(handle)
         if version == 6:
-            self.parse_locus_version_6(handle)
+            self.__parse_locus_version_6(handle)
         elif version == 7:
-            self.parse_locus_version_7(handle)
+            self.__parse_locus_version_7(handle)
         elif version == 8:
-            self.parse_locus_version_8(handle)
+            self.__parse_locus_version_8(handle)
         else:
             raise Exception("Manifest format error: unknown version for locus entry (" + str(version) + ")")
 
-    def parse_locus_version_6(self,handle):
+    def __parse_locus_version_6(self,handle):
         """Helper function to parse version 6 locus entry
         Args:
-            handle (file handle): File handle at start fo locus entry record
+            handle (file handle): File handle at start of locus entry record
         Returns:
             None
         """  
@@ -697,42 +699,79 @@ class LocusEntry:
             if self.assay_type == 0:
                 raise Exception("Manifest format error: Assay type is inconsistent with address B")
 
-    def parse_locus_version_7(self, handle):
+    def __parse_locus_version_7(self, handle):
         """Helper function to parse version 7 locus entry
         Args:
-            handle (file handle): File handle at start fo locus entry record
+            handle (file handle): File handle at start of locus entry record
         Returns:
             None
         """  
-        self.parse_locus_version_6(handle)
+        self.__parse_locus_version_6(handle)
         handle.read(4 * 4)
 
-    def parse_locus_version_8(self, handle):
+    def __parse_locus_version_8(self, handle):
         """Helper function to parse version 8 locus entry
         Args:
-            handle (file handle): File handle at start fo locus entry record
+            handle (file handle): File handle at start of locus entry record
         Returns:
             None
         """         
-        self.parse_locus_version_7(handle)
+        self.__parse_locus_version_7(handle)
         read_string(handle)
     
 def read_char(handle):
+    """Helper function to parse character from file handle
+    Args:
+        handle (file handle): File handle
+    Returns:
+        char value read from handle
+    """ 
     return handle.read(1)
 
 def read_ushort(handle):
+    """Helper function to parse ushort from file handle
+    Args:
+        handle (file handle): File handle
+    Returns:
+        ushort value read from handle
+    """     
     return struct.unpack("<H", handle.read(2))[0]
 
 def read_int(handle):
+    """Helper function to parse int from file handle
+    Args:
+        handle (file handle): File handle
+    Returns:
+        int value read from handle
+    """     
     return struct.unpack("<i", handle.read(4))[0]
 
 def read_float(handle):
+    """Helper function to parse float from file handle
+    Args:
+        handle (file handle): File handle
+    Returns:
+        float value read from handle
+    """ 
     return struct.unpack("<f",handle.read(4))[0]
 
 def read_byte(handle):
+    """Helper function to parse byte from file handle
+    Args:
+        handle (file handle): File handle
+    Returns:
+        byte value read from handle
+    """ 
     return struct.unpack("<B",handle.read(1))[0]
 
 def read_string(handle):
+    """Helper function to parse string from file handle. See https://msdn.microsoft.com/en-us/library/yzxa6408(v=vs.100).aspx
+    for additional details on string format.
+    Args:
+        handle (file handle): File handle
+    Returns:
+        string value read from handle
+    """    
     total_length = 0
     partial_length = read_byte(handle)
     num_bytes = 0
@@ -744,6 +783,12 @@ def read_string(handle):
     return handle.read(total_length)
 
 def read_scanner_data(handle):
+    """Helper function to parse ScannerData object from file handle. 
+    Args:
+        handle (file handle): File handle
+    Returns:
+        ScannerData value read from handle
+    """    
     name = read_string(handle)
     pmt_green = read_int(handle)
     pmt_red = read_int(handle)

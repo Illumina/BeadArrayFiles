@@ -24,7 +24,7 @@ If the user prefers not to use the python distutils framework, it is also possib
 > for (locus, genotype) in zip( names, genotypes ):  
 > &nbsp;&nbsp;sys.stdout.write( locus + "," + code2genotype[genotype] + "\n" )
 
-Also, see examples/gtc_final_report.py for an addi
+Also, see examples/gtc_final_report.py for an additional example of usage. 
 
 ## GTC File Format
 The specification for the GTC file format is provided in docs/GTC_File_Format_v5.pdf

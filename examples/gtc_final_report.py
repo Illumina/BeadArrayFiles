@@ -9,7 +9,7 @@ delim = "\t"
 parser = argparse.ArgumentParser("Generate a final report from a directory of GTC files")
 parser.add_argument("manifest", help="BPM manifest file")
 parser.add_argument("gtc_directory", help="Directory containing GTC files")
-parser.add_argument("output_file", help="Locatin to write report")
+parser.add_argument("output_file", help="Location to write report")
 
 args = parser.parse_args()
 

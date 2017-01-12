@@ -203,7 +203,7 @@ class GenotypeCalls:
 
     def get_ploidy_type(self):
         """Returns:
-            The ploidy of the sample 
+            The ploidy type of the sample 
         """
         return self.toc_table[GenotypeCalls.__ID_PLOIDY_TYPE]
         
@@ -276,6 +276,68 @@ class GenotypeCalls:
         """
         return self.__get_generic_array(GenotypeCalls.__ID_GENOTYPES, read_byte)
 
+    def get_base_calls_generic(self, snps, strand_annotations, report_strand, unknown_annotation):
+        """
+        Get base calls on arbitrary strand
+        Args:
+            snps (list<string>) : A list of string representing the snp on the design strand for the loci (e.g. [A/C])
+            strand_annotations (list<int>) : A list of strand annotations for the loci
+            report_strand (int) : The strand to use for reporting (must match encoding of strand_annotations)
+            unknown_annotation (int) : The encoding used in strand annotations for an unknown strand
+        Returns:
+            The genotype basecalls on the report strand as a list of strings. 
+            The characters are A, C, G, T, or - for a no-call/null.
+        """
+        genotypes = self.get_genotypes()
+        if len(genotypes) != len(snps):
+            raise ValueError("The number of SNPs must match the number of loci in the GTC file")
+        
+        if len(genotypes) != len(strand_annotations):
+            raise ValueError("The number of reference strand annotations must match the number of loci in the GTC file")
+        
+        result = []
+        for (genotype, snp, strand_annotation) in zip(genotypes, snps, strand_annotations):
+            ab_genotype = code2genotype[genotype]
+            a_nucleotide = snp[1]
+            b_nucleotide = snp[-2]
+            if a_nucleotide == "N" or b_nucleotide == "N" or strand_annotation == unknown_annotation or ab_genotype == "NC" or ab_genotype == "NULL":
+                result.append("-")
+            else:
+                report_strand_nucleotides = []
+                for ab_allele in ab_genotype:
+                    nucleotide_allele = a_nucleotide if ab_allele == "A" else b_nucleotide
+                    report_strand_nucleotides.append(nucleotide_allele if strand_annotation == report_strand else complement(nucleotide_allele))
+                result.append("".join(report_strand_nucleotides))
+        return result
+
+    def get_base_calls_plus_strand(self, snps, ref_strand_annotations):
+        """
+        Get base calls on plus strand of genomic reference. If you only see no-calls returned from this method,
+        please verify that the reference strand annotations passed as argument are not unknown (RefStrand.Unknown)
+
+        Args:
+            snps (list<string>) : A list of string representing the snp on the design strand for the loci (e.g. [A/C])
+            ref_strand_annotations (list<int>) : A list of strand annotations for the loci (e.g., RefStrand.Plus)
+        Returns:
+            The genotype basecalls on the report strand as a list of strings. 
+            The characters are A, C, G, T, or - for a no-call/null.
+        """
+        return self.get_base_calls_generic(snps, ref_strand_annotations, RefStrand.Plus, RefStrand.Unknown)
+
+
+    def get_base_calls_forward_strand(self, snps, forward_strand_annotations):
+        """
+        Get base calls on the forward strand. 
+
+        Args:
+            snps (list<string>) : A list of string representing the snp on the design strand for the loci (e.g. [A/C])
+            forward_strand_annotations (list<int>) : A list of strand annotations for the loci (e.g., SourceStrand.Forward)
+        Returns:
+            The genotype basecalls on the report strand as a list of strings. 
+            The characters are A, C, G, T, or - for a no-call/null.
+        """
+        return self.get_base_calls_generic(snps, forward_strand_annotations, SourceStrand.Forward, RefStrand.Unknown)
+
     def get_base_calls(self):
         """Returns:
             The genotype basecalls as a list of strings. 
@@ -287,8 +349,8 @@ class GenotypeCalls:
         except:
             ploidy_type = 1
             
-	if ploidy_type != 1:
-		genotypes = self.get_genotypes()
+        if ploidy_type != 1:
+            genotypes = self.get_genotypes()
 		
         with open(self.filename, "rb") as gtc_handle:
             gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_BASE_CALLS])
@@ -547,9 +609,14 @@ class BeadPoolManifest:
     """Class for parsing binary (BPM) manifest file.
     Attributes:
         names (list of strings): Names of loci from manifest
+        snps (list of strings) : SNP values of loci from manifest
+        chroms (list of string) : Chromosome values for loci
+        map_infos = (list of ints) : Map infor values for loci
         addresses (list of ints): AddressA IDs of loci from manifest
         normalization_lookups (list of ints): Normalization lookups from manifest. This indexes into
                                          list of normalization transforms read from GTC file
+        ref_strands (list of ints) : Reference strand annotation for loci (see RefStrand class)
+        source_strands (list of ints) : Source strand annotations for loci (see SourceStrand class)
         num_loci (int): Number of loci in manifest
         manifest_name (string): Name of manifest
         control_config (string): Control description from manifest
@@ -562,10 +629,15 @@ class BeadPoolManifest:
             BeadPoolManifest
         """        
         self.names = []
+        self.snps = []
+        self.chroms = []
+        self.map_infos = []
         self.addresses = []
         self.normalization_ids = []
         self.assay_types = []
         self.normalization_lookups = []
+        self.ref_strands = []
+        self.source_strands = []
         self.num_loci = 0
         self.manifest_name = ""
         self.control_config = ""
@@ -612,11 +684,21 @@ class BeadPoolManifest:
             
             self.assay_types = [0] * self.num_loci
             self.addresses = [0] * self.num_loci
+            self.snps = [""] * self.num_loci
+            self.chroms = [""] * self.num_loci
+            self.map_infos = [0] * self.num_loci
+            self.ref_strands = [RefStrand.Unknown] * self.num_loci
+            self.source_strands = [SourceStrand.Unknown] * self.num_loci
             for idx in xrange(self.num_loci):
                 locus_entry = LocusEntry(manifest_handle)
-                self.assay_types[ name_lookup[locus_entry.name] ] = locus_entry.assay_type
-                self.addresses[ name_lookup[locus_entry.name] ] = locus_entry.address_a
-            
+                self.assay_types[name_lookup[locus_entry.name]] = locus_entry.assay_type
+                self.addresses[name_lookup[locus_entry.name]] = locus_entry.address_a
+                self.snps[name_lookup[locus_entry.name]] = locus_entry.snp
+                self.chroms[name_lookup[locus_entry.name]] = locus_entry.chrom
+                self.map_infos[name_lookup[locus_entry.name]] = locus_entry.map_info
+                self.ref_strands[name_lookup[locus_entry.name]] = locus_entry.ref_strand
+                self.source_strands[name_lookup[locus_entry.name]] = locus_entry.source_strand
+
             if len(self.normalization_ids) != len(self.assay_types):
                 raise Exception("Manifest format error: read invalid number of assay entries")
 
@@ -630,15 +712,108 @@ class BeadPoolManifest:
                 lookup_dictionary[sorted_norm_ids[idx]] = idx
             self.normalization_lookups =  [lookup_dictionary[normalization_id] for normalization_id in self.normalization_ids]
 
+
+class SourceStrand:
+    Unknown = 0
+    Forward = 1
+    Reverse = 2
+
+    @staticmethod
+    def to_string(source_strand):
+        """Get an integer representation of source strand annotation
+
+        Args:
+            source_strand (str) : string representation of source strand annotation (e.g., "F")
+        
+        Returns:
+            int : int representation of source strand annotation (e.g. SourceStrand.Forward)
+        """
+        if source_strand == SourceStrand.Unknown:
+            return "U"
+        elif source_strand == SourceStrand.Forward:
+            return "F"
+        elif source_strand == SourceStrand.Reverse:
+            return "R"
+        else:
+            raise Exception("Unexpected value for source strand " + source_strand)
+    
+    @staticmethod
+    def from_string(source_strand):
+        """Get a string representation of source strand annotation
+
+        Args:
+            source_strand (int) : int representation of source strand (e.g., SourceStrand.Forward)
+        
+        Returns:
+            str : string representation of source strand annotation
+        """
+        if source_strand == "U":
+            return SourceStrand.Unknown
+        if source_strand == "F":
+            return SourceStrand.Forward
+        elif source_strand == "R":
+            return SourceStrand.Reverse
+        else:
+            raise Exception("Unexpected value for source strand " + source_strand)
+
+class RefStrand:
+    Unknown = 0
+    Plus = 1
+    Minus = 2
+
+    @staticmethod
+    def to_string(ref_strand):
+        """Get a string reprensetation of ref strand annotation
+
+        Args:
+            ref_strand (int) : int representation of ref strand (e.g., RefStrand.Plus)
+        
+        Returns:
+            str : string representation of reference strand annotation
+        """
+        if ref_strand == RefStrand.Unknown:
+            return "U"
+        elif ref_strand == RefStrand.Plus:
+            return "+"
+        elif ref_strand == RefStrand.Minus:
+            return "-"
+        else:
+            raise Exception("Unexpected value for reference strand " + ref_strand)
+    
+    @staticmethod
+    def from_string(ref_strand):
+        """Get an integer representation of ref strand annotation
+
+        Args:
+            ref_strand (str) : string representation of reference strand annotation (e.g., "+")
+        
+        Returns:
+            int : int representation of reference strand annotation (e.g. RefStrand.Plus)
+        """
+        if ref_strand == "U":
+            return RefStrand.Unknown
+        if ref_strand == "+":
+            return RefStrand.Plus
+        elif ref_strand == "-":
+            return RefStrand.Minus
+        else:
+            raise Exception("Unexpected value for reference strand " + ref_strand)
+
 class LocusEntry:
     """Helper class representing a locus entry within a bead pool manifest. Current only support version
     6,7, and 8.
     Attributes:
         ilmn_id (string) : IlmnID (probe identifier) of locus
         name (string): Name (variant identifier) of locus
+        snp (string) : SNP value for locus (e.g., [A/C])
+        chrom (string) : Chromosome for the locus (e.g., XY)
+        map_info (int) : Mapping location of locus 
         assay_type (int) : Identifies type of assay (0 - Infinium II , 1 - Infinium I (A/T), 2 - Infinium I (G/C)
         address_a (int) : AddressA ID of locus
         address_b (int) : AddressB ID of locus (0 if none)
+        ref_strand (int) : See RefStrand class
+        source_strand (int) : See SourceStrand class
+
     """
     def __init__(self, handle):
         """Constructor
@@ -648,10 +823,15 @@ class LocusEntry:
             LocusEntry
         """ 
         self.ilmn_id = ""
-        self.name = ""  
+        self.name = ""
+        self.snp = ""
+        self.chrom = ""
+        self.map_info = -1
         self.assay_type = -1
         self.address_a = -1
         self.address_b = -1
+        self.ref_strand = RefStrand.Unknown
+        self.source_strand = SourceStrand.Unknown
         self.__parse_file(handle)
 
     def __parse_file(self, handle):
@@ -679,11 +859,19 @@ class LocusEntry:
             None
         """  
         self.ilmn_id = read_string(handle)
+        self.source_strand = SourceStrand.from_string(self.ilmn_id.split("_")[-2])
         self.name = read_string(handle)
         for idx in xrange(3):
             read_string(handle)
         handle.read(4)
-        for idx in xrange(9):
+        for idx in xrange(2):
+            read_string(handle)
+        self.snp = read_string(handle)
+        self.chrom = read_string(handle)
+        for idx in xrange(2):
+            read_string(handle)
+        self.map_info = int(read_string(handle))
+        for idx in xrange(2):
             read_string(handle)
         self.address_a = read_int(handle)
         self.address_b = read_int(handle)
@@ -718,8 +906,21 @@ class LocusEntry:
             None
         """         
         self.__parse_locus_version_7(handle)
-        read_string(handle)
-    
+        self.ref_strand = RefStrand.from_string(read_string(handle))
+
+complement_map = {"A": "T", "T":"A", "C":"G", "G":"C", "D":"D", "I":"I"}
+
+def complement(nucleotide):
+    """Complement a single nucleotide. Complements of D(eletion) and I(nsertion) are D and I, respectively. 
+    Args:
+        nucleotide (string) : Nucleotide, must be A, C, T, G, D, or I
+    Returns:
+        str : Complemented nucleotide
+    """
+    if nucleotide in complement_map:
+        return complement_map[nucleotide]
+    raise ValueError("Nucleotide must be one of A, C, T, G, D, or I")
+
 def read_char(handle):
     """Helper function to parse character from file handle
     Args:

@@ -25,7 +25,7 @@
 ##    of the authors and should not be interpreted as representing official policies,
 ##    either expressed or implied, of the FreeBSD Project.
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 import struct
 from math import cos,sin,pi,atan2
 

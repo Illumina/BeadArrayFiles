@@ -728,11 +728,11 @@ class SourceStrand:
         Returns:
             int : int representation of source strand annotation (e.g. SourceStrand.Forward)
         """
-        if source_strand == 0:
+        if source_strand == SourceStrand.Unknown:
             return "U"
-        elif source_strand == 1:
+        elif source_strand == SourceStrand.Forward:
             return "F"
-        elif source_strand == 2:
+        elif source_strand == SourceStrand.Reverse:
             return "R"
         else:
             raise Exception("Unexpected value for source strand " + source_strand)
@@ -763,25 +763,6 @@ class RefStrand:
 
     @staticmethod
     def to_string(ref_strand):
-        """Get an integer representation of ref strand annotation
-
-        Args:
-            ref_strand (str) : string representation of reference strand annotation (e.g., "+")
-        
-        Returns:
-            int : int representation of reference strand annotation (e.g. RefStrand.Plus)
-        """
-        if ref_strand == 0:
-            return "U"
-        elif ref_strand == 1:
-            return "+"
-        elif ref_strand == 2:
-            return "-"
-        else:
-            raise Exception("Unexpected value for reference strand " + ref_strand)
-    
-    @staticmethod
-    def from_string(ref_strand):
         """Get a string reprensetation of ref strand annotation
 
         Args:
@@ -789,6 +770,25 @@ class RefStrand:
         
         Returns:
             str : string representation of reference strand annotation
+        """
+        if ref_strand == RefStrand.Unknown:
+            return "U"
+        elif ref_strand == RefStrand.Plus:
+            return "+"
+        elif ref_strand == RefStrand.Minus:
+            return "-"
+        else:
+            raise Exception("Unexpected value for reference strand " + ref_strand)
+    
+    @staticmethod
+    def from_string(ref_strand):
+        """Get an integer representation of ref strand annotation
+
+        Args:
+            ref_strand (str) : string representation of reference strand annotation (e.g., "+")
+        
+        Returns:
+            int : int representation of reference strand annotation (e.g. RefStrand.Plus)
         """
         if ref_strand == "U":
             return RefStrand.Unknown
@@ -908,9 +908,10 @@ class LocusEntry:
         self.__parse_locus_version_7(handle)
         self.ref_strand = RefStrand.from_string(read_string(handle))
 
-complement_map = {"A": "T", "T":"A", "C":"G", "G":"C", "D":"D", "I":"I"}    
+complement_map = {"A": "T", "T":"A", "C":"G", "G":"C", "D":"D", "I":"I"}
+
 def complement(nucleotide):
-    """Complement a single nucleotide. Complements of D and I are D and I, respectively. 
+    """Complement a single nucleotide. Complements of D(eletion) and I(nsertion) are D and I, respectively. 
     Args:
         nucleotide (string) : Nucleotide, must be A, C, T, G, D, or I
     Returns:

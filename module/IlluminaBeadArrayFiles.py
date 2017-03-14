@@ -576,8 +576,14 @@ class NormalizationTransform:
         tempx3 = tempx2 - self.shear * tempy2
         tempy3 = tempy2
 
-        xn = tempx3 / self.scale_x
-        yn = tempy3 / self.scale_y
+        if self.scale_x == 0:
+            xn = 0.0
+        else:
+            xn = tempx3 / self.scale_x
+        if self.scale_y == 0:
+            yn = 0.0
+        else:
+            yn = tempy3 / self.scale_y
 
         if threshold:
             xn = max(0, xn)

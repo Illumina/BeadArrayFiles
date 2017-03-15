@@ -28,7 +28,7 @@
 __version__ = "1.0.0"
 import struct
 from math import cos,sin,pi,atan2
-
+nan = float('nan')
 
 code2genotype = [
 "NC",
@@ -494,7 +494,7 @@ class NormalizationTransform:
             (R,theta) polar values as tuple of floats
         """
         if x == 0 and y == 0:
-            return (float("nan"), float("nan"))
+            return (nan, nan)
         return (x + y, atan2(y,x) * 2.0 / pi)
 
     def normalize_intensities(self, x, y, threshold = True):
@@ -514,8 +514,8 @@ class NormalizationTransform:
         tempx3 = tempx2 - self.shear * tempy2
         tempy3 = tempy2
 
-        xn = tempx3 / self.scale_x
-        yn = tempy3 / self.scale_y
+        xn = nan if self.scale_x == 0 else tempx3 / self.scale_x
+        yn = nan if self.scale_y == 0 else tempy3 / self.scale_y
 
         if threshold:
             xn = max(0, xn)

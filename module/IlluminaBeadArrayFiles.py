@@ -27,7 +27,7 @@
 
 __version__ = "1.1.1"
 import struct
-from numpy import cos, sin, pi, arctan2, float32, int16, int32, seterr
+from numpy import cos, sin, pi, arctan2, float32, uint16, int32, seterr, frombuffer
 seterr(divide='ignore', invalid='ignore')
 
 nan = float32('nan')
@@ -537,7 +537,8 @@ class NormalizationTransform:
         Returns:
             NormalizationTransform object
         """
-        (self.version, self.offset_x, self.offset_y, self.scale_x, self.scale_y, self.shear, self.theta,) = struct.unpack("<iffffff", buffer[:28])
+        (self.version, ) = struct.unpack("<i", buffer[:4])
+        (self.offset_x, self.offset_y, self.scale_x, self.scale_y, self.shear, self.theta,) = frombuffer(buffer[4:28], dtype=float32)
     
     @staticmethod
     def read_normalization_transform(handle):
@@ -569,6 +570,9 @@ class NormalizationTransform:
         Returns:
             (xn, yn) normalized intensities as tuple of floats
         """
+        if x <= 0 and y <= 0:
+            return (nan, nan)
+
         tempx = x - self.offset_x
         tempy = y - self.offset_y
 
@@ -939,7 +943,7 @@ def read_ushort(handle):
     Returns:
         numpy.int16 value read from handle
     """     
-    return int16(struct.unpack("<H", handle.read(2))[0])
+    return uint16(struct.unpack("<H", handle.read(2))[0])
 
 def read_int(handle):
     """Helper function to parse int from file handle

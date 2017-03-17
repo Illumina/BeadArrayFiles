@@ -27,8 +27,10 @@
 
 __version__ = "1.1.1"
 import struct
-from math import cos,sin,pi,atan2
-nan = float('nan')
+from numpy import cos, sin, pi, arctan2, float32, int16, int32, seterr
+seterr(divide='ignore', invalid='ignore')
+
+nan = float32('nan')
 
 code2genotype = [
 "NC",
@@ -549,15 +551,15 @@ class NormalizationTransform:
 
     @staticmethod
     def rect_to_polar((x,y)):
-        """Converts x,y intensities to (pseudo) polar co-ordinates (R, theta)
+        """Converts normalized x,y intensities to (pseudo) polar co-ordinates (R, theta)
         Args:
-            x,y (int,int): Raw x,y intensities for probe
+            x,y (float, float): Normalized x,y intensities for probe
         Returns:
             (R,theta) polar values as tuple of floats
         """
         if x == 0 and y == 0:
             return (nan, nan)
-        return (x + y, atan2(y,x) * 2.0 / pi)
+        return (x + y, arctan2(y,x) * 2.0 / pi)
 
     def normalize_intensities(self, x, y, threshold = True):
         """Apply this normalization transform to raw intensities
@@ -576,12 +578,12 @@ class NormalizationTransform:
         tempx3 = tempx2 - self.shear * tempy2
         tempy3 = tempy2
 
-        xn = tempx3 / self.scale_x if self.scale_x != 0 else nan
-        yn = tempy3 / self.scale_y if self.scale_y != 0 else nan
+        xn = tempx3 / self.scale_x 
+        yn = tempy3 / self.scale_y 
 
         if threshold:
-            xn = max(0, xn)
-            yn = max(0, yn)
+            xn = 0 if 0 > xn else xn
+            yn = 0 if 0 > yn else yn
             
         return (xn, yn)
 
@@ -935,27 +937,27 @@ def read_ushort(handle):
     Args:
         handle (file handle): File handle
     Returns:
-        ushort value read from handle
+        numpy.int16 value read from handle
     """     
-    return struct.unpack("<H", handle.read(2))[0]
+    return int16(struct.unpack("<H", handle.read(2))[0])
 
 def read_int(handle):
     """Helper function to parse int from file handle
     Args:
         handle (file handle): File handle
     Returns:
-        int value read from handle
+        numpy.int32 value read from handle
     """     
-    return struct.unpack("<i", handle.read(4))[0]
+    return int32(struct.unpack("<i", handle.read(4))[0])
 
 def read_float(handle):
     """Helper function to parse float from file handle
     Args:
         handle (file handle): File handle
     Returns:
-        float value read from handle
+        numpy.float32 value read from handle
     """ 
-    return struct.unpack("<f",handle.read(4))[0]
+    return float32(struct.unpack("<f",handle.read(4))[0])
 
 def read_byte(handle):
     """Helper function to parse byte from file handle

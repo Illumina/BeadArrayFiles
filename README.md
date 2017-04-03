@@ -13,6 +13,9 @@ After unpacking the installation package, run the setup.py script supplying the 
 
 If the user prefers not to use the python distutils framework, it is also possible to copy the IlluminaBeadArrayFiles.py source file into a location referenced by the PYTHONPATH environment variable.
 
+## Dependencies
+The library depends on the availability of the numpy package in the python installation (http://www.numpy.org/)
+
 ## Example usage
 
 > from IlluminaBeadArrayFiles import GenotypeCalls, BeadPoolManifest, code2genotype  

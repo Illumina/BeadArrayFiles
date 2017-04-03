@@ -27,8 +27,10 @@
 
 __version__ = "1.1.1"
 import struct
-from math import cos,sin,pi,atan2
+from numpy import cos, sin, pi, arctan2, float32, uint16, int32, seterr, frombuffer, dtype
+seterr(divide='ignore', invalid='ignore')
 
+nan = float32('nan')
 
 code2genotype = [
 "NC",
@@ -187,7 +189,23 @@ class GenotypeCalls:
             for idx in xrange(num_entries):
                 result.append( parse_function( gtc_handle ) )
             return result
-    
+
+    def __get_generic_array_numpy(self, toc_entry, numpy_type):
+        """Internal helper function to access a data array in a generic
+        fashion.
+
+        Args:
+            toc_entry (int): Identifier for entry in table of contents
+            parse_function (function): A function used to parse the value
+                                         from a file handle
+        Returns:
+            An array parsed from the file (type dependent on parse_function)
+        """
+        numpy_type = dtype(numpy_type)
+        with open(self.filename, "rb") as gtc_handle:
+            gtc_handle.seek(self.toc_table[toc_entry])
+            num_entries = read_int(gtc_handle)
+            return frombuffer(gtc_handle.read(num_entries*numpy_type.itemsize), dtype=numpy_type)
 
     def get_num_snps(self):
         """Returns:
@@ -373,7 +391,7 @@ class GenotypeCalls:
         """Returns:
             The genotype scores as a list of floats
         """
-        return self.__get_generic_array(GenotypeCalls.__ID_GENOTYPE_SCORES, read_float)
+        return self.__get_generic_array_numpy(GenotypeCalls.__ID_GENOTYPE_SCORES, float32)
 
     def get_scanner_data(self):
         """Returns:
@@ -385,25 +403,25 @@ class GenotypeCalls:
         """Returns:
             The x intensities of control bead types as a list of integers
         """
-        return self.__get_generic_array(GenotypeCalls.__ID_CONTROLS_X, read_ushort)
+        return self.__get_generic_array_numpy(GenotypeCalls.__ID_CONTROLS_X, uint16)
     
     def get_control_y_intensities(self):
         """Returns:
             The y intensities of control bead types as a list of integers
         """
-        return self.__get_generic_array(GenotypeCalls.__ID_CONTROLS_Y, read_ushort)
+        return self.__get_generic_array_numpy(GenotypeCalls.__ID_CONTROLS_Y, uint16)
 
     def get_raw_x_intensities(self):
         """Returns:
             The raw x intensities of assay bead types as a list of integers
         """
-        return self.__get_generic_array(GenotypeCalls.__ID_RAW_X, read_ushort)
+        return self.__get_generic_array_numpy(GenotypeCalls.__ID_RAW_X, uint16)
     
     def get_raw_y_intensities(self):
         """Returns:
             The raw y intensities of assay bead types as a list of integers
         """
-        return self.__get_generic_array(GenotypeCalls.__ID_RAW_Y, read_ushort)
+        return self.__get_generic_array_numpy(GenotypeCalls.__ID_RAW_Y, uint16)
 
     def get_call_rate(self):
         """Returns:
@@ -466,7 +484,7 @@ class GenotypeCalls:
         """
         if self.version < 4:
             raise Exception("B allele frequencies unavailable in GTC File version ("+str(self.version)+")")
-        return self.__get_generic_array(GenotypeCalls.__ID_B_ALLELE_FREQS, read_float)
+        return self.__get_generic_array_numpy(GenotypeCalls.__ID_B_ALLELE_FREQS, float32)
 
     def get_logr_ratios(self):
         """Returns:
@@ -474,7 +492,7 @@ class GenotypeCalls:
         """        
         if self.version < 4:
             raise Exception("LogR ratios unavailable in GTC File version ("+str(self.version)+")")
-        return self.__get_generic_array(GenotypeCalls.__ID_LOGR_RATIOS, read_float)
+        return self.__get_generic_array_numpy(GenotypeCalls.__ID_LOGR_RATIOS, float32)
 
     def get_percentiles_x(self):
         """Returns:
@@ -535,7 +553,8 @@ class NormalizationTransform:
         Returns:
             NormalizationTransform object
         """
-        (self.version, self.offset_x, self.offset_y, self.scale_x, self.scale_y, self.shear, self.theta,) = struct.unpack("<iffffff", buffer[:28])
+        (self.version, ) = struct.unpack("<i", buffer[:4])
+        (self.offset_x, self.offset_y, self.scale_x, self.scale_y, self.shear, self.theta,) = frombuffer(buffer[4:28], dtype=float32)
     
     @staticmethod
     def read_normalization_transform(handle):
@@ -549,15 +568,15 @@ class NormalizationTransform:
 
     @staticmethod
     def rect_to_polar((x,y)):
-        """Converts x,y intensities to (pseudo) polar co-ordinates (R, theta)
+        """Converts normalized x,y intensities to (pseudo) polar co-ordinates (R, theta)
         Args:
-            x,y (int,int): Raw x,y intensities for probe
+            x,y (float, float): Normalized x,y intensities for probe
         Returns:
             (R,theta) polar values as tuple of floats
         """
         if x == 0 and y == 0:
-            return (float("nan"), float("nan"))
-        return (x + y, atan2(y,x) * 2.0 / pi)
+            return (nan, nan)
+        return (x + y, arctan2(y,x) * 2.0 / pi)
 
     def normalize_intensities(self, x, y, threshold = True):
         """Apply this normalization transform to raw intensities
@@ -567,6 +586,9 @@ class NormalizationTransform:
         Returns:
             (xn, yn) normalized intensities as tuple of floats
         """
+        if x <= 0 and y <= 0:
+            return (nan, nan)
+
         tempx = x - self.offset_x
         tempy = y - self.offset_y
 
@@ -576,12 +598,12 @@ class NormalizationTransform:
         tempx3 = tempx2 - self.shear * tempy2
         tempy3 = tempy2
 
-        xn = tempx3 / self.scale_x
-        yn = tempy3 / self.scale_y
+        xn = tempx3 / self.scale_x 
+        yn = tempy3 / self.scale_y 
 
         if threshold:
-            xn = max(0, xn)
-            yn = max(0, yn)
+            xn = 0 if 0 > xn else xn
+            yn = 0 if 0 > yn else yn
             
         return (xn, yn)
 
@@ -935,17 +957,17 @@ def read_ushort(handle):
     Args:
         handle (file handle): File handle
     Returns:
-        ushort value read from handle
-    """     
-    return struct.unpack("<H", handle.read(2))[0]
+        numpy.int16 value read from handle
+    """
+    return frombuffer(handle.read(2), dtype=uint16)[0]
 
 def read_int(handle):
     """Helper function to parse int from file handle
     Args:
         handle (file handle): File handle
     Returns:
-        int value read from handle
-    """     
+        numpy.int32 value read from handle
+    """
     return struct.unpack("<i", handle.read(4))[0]
 
 def read_float(handle):
@@ -953,9 +975,9 @@ def read_float(handle):
     Args:
         handle (file handle): File handle
     Returns:
-        float value read from handle
+        numpy.float32 value read from handle
     """ 
-    return struct.unpack("<f",handle.read(4))[0]
+    return frombuffer(handle.read(4), dtype=float32)[0]
 
 def read_byte(handle):
     """Helper function to parse byte from file handle

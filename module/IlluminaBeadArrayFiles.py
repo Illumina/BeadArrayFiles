@@ -369,22 +369,22 @@ class GenotypeCalls:
             
         if ploidy_type != 1:
             genotypes = self.get_genotypes()
-		
+        
         with open(self.filename, "rb") as gtc_handle:
             gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_BASE_CALLS])
             num_entries = read_int(gtc_handle)
             result = []
             for idx in xrange(num_entries):
-            	if ploidy_type == 1:
-                	result.append( gtc_handle.read(2) )
+                if ploidy_type == 1:
+                    result.append( gtc_handle.read(2) )
                 else:
-                	byte_string = gtc_handle.read(2)
-                	ab_genotype = code2genotype[genotypes[idx]]
-                	if ab_genotype == "NC" or ab_genotype == "NULL":
-                		result.append("-")
-                	else:
-                		top_genotype = "".join([ byte_string[0] if allele == "A" else byte_string[1] for allele in ab_genotype])
-                		result.append( top_genotype )
+                    byte_string = gtc_handle.read(2)
+                    ab_genotype = code2genotype[genotypes[idx]]
+                    if ab_genotype == "NC" or ab_genotype == "NULL":
+                        result.append("-")
+                    else:
+                        top_genotype = "".join([ byte_string[0] if allele == "A" else byte_string[1] for allele in ab_genotype])
+                        result.append( top_genotype )
             return result
 
     def get_genotype_scores(self):
@@ -541,9 +541,37 @@ class GenotypeCalls:
             The normalization transforms used during genotyping (as a lit of NormalizationTransforms)
         """
         return self.__get_generic_array(GenotypeCalls.__ID_NORMALIZATION_TRANSFORMS, NormalizationTransform.read_normalization_transform)
-    	
+    
+    def is_write_complete(self):
+        """Check for last item written to GTC file to verify that write
+        has successfully completed
 
+        Args:
+            None
 
+        Returns
+            Whether or not write is complete (bool)
+        """            
+        if self.version == 3:
+            try:
+                self.get_num_intensity_only()
+                return True
+            except:
+                return False
+        elif self.version == 4:
+            try:
+                self.get_logr_ratios()
+                return True
+            except:
+                return False
+        elif self.version == 5:
+            try:
+                self.get_slide_identifier()
+                return True
+            except:
+                return False
+        else:
+            raise Exception("Unable to test for write completion on version " + str(self.version) + " GTC file")
 
 class NormalizationTransform:
     def __init__(self, buffer):

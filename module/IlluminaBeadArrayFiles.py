@@ -126,7 +126,7 @@ class GenotypeCalls:
     __ID_SLIDE_IDENTIFIER = 1016
     
     supported_version = [3,4,5];
-    def __init__(self, filename, ignore_version = False):
+    def __init__(self, filename, ignore_version = False, check_write_complete = True):
         """Constructor
 
         Args:
@@ -154,6 +154,8 @@ class GenotypeCalls:
             for toc_idx in xrange(number_toc_entries):
                 (id, offset) = struct.unpack("<hI",gtc_handle.read(6))
                 self.toc_table[id] = offset
+        if check_write_complete and not self.is_write_complete():
+            raise Exception("GTC file is incomplete")
     
     def __get_generic(self, toc_entry, parse_function):
         """Internal helper function to access a data element in a
@@ -369,22 +371,22 @@ class GenotypeCalls:
             
         if ploidy_type != 1:
             genotypes = self.get_genotypes()
-		
+        
         with open(self.filename, "rb") as gtc_handle:
             gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_BASE_CALLS])
             num_entries = read_int(gtc_handle)
             result = []
             for idx in xrange(num_entries):
-            	if ploidy_type == 1:
-                	result.append( gtc_handle.read(2) )
+                if ploidy_type == 1:
+                    result.append( gtc_handle.read(2) )
                 else:
-                	byte_string = gtc_handle.read(2)
-                	ab_genotype = code2genotype[genotypes[idx]]
-                	if ab_genotype == "NC" or ab_genotype == "NULL":
-                		result.append("-")
-                	else:
-                		top_genotype = "".join([ byte_string[0] if allele == "A" else byte_string[1] for allele in ab_genotype])
-                		result.append( top_genotype )
+                    byte_string = gtc_handle.read(2)
+                    ab_genotype = code2genotype[genotypes[idx]]
+                    if ab_genotype == "NC" or ab_genotype == "NULL":
+                        result.append("-")
+                    else:
+                        top_genotype = "".join([ byte_string[0] if allele == "A" else byte_string[1] for allele in ab_genotype])
+                        result.append( top_genotype )
             return result
 
     def get_genotype_scores(self):
@@ -541,9 +543,37 @@ class GenotypeCalls:
             The normalization transforms used during genotyping (as a lit of NormalizationTransforms)
         """
         return self.__get_generic_array(GenotypeCalls.__ID_NORMALIZATION_TRANSFORMS, NormalizationTransform.read_normalization_transform)
-    	
+    
+    def is_write_complete(self):
+        """Check for last item written to GTC file to verify that write
+        has successfully completed
 
+        Args:
+            None
 
+        Returns
+            Whether or not write is complete (bool)
+        """            
+        if self.version == 3:
+            try:
+                self.get_num_intensity_only()
+                return True
+            except:
+                return False
+        elif self.version == 4:
+            try:
+                self.get_logr_ratios()
+                return True
+            except:
+                return False
+        elif self.version == 5:
+            try:
+                self.get_slide_identifier()
+                return True
+            except:
+                return False
+        else:
+            raise Exception("Unable to test for write completion on version " + str(self.version) + " GTC file")
 
 class NormalizationTransform:
     def __init__(self, buffer):
@@ -1004,7 +1034,11 @@ def read_string(handle):
         partial_length = ord(struct.unpack("c", handle.read(1))[0])
         num_bytes += 1
     total_length += partial_length << ( 7 * num_bytes)
-    return handle.read(total_length)
+    result = handle.read(total_length)
+    if len(result) < total_length:
+        raise Exception("Failed to read complete string")
+    else:
+        return result
 
 def read_scanner_data(handle):
     """Helper function to parse ScannerData object from file handle. 

@@ -126,7 +126,7 @@ class GenotypeCalls:
     __ID_SLIDE_IDENTIFIER = 1016
     
     supported_version = [3,4,5];
-    def __init__(self, filename, ignore_version = False):
+    def __init__(self, filename, ignore_version = False, check_write_complete = True):
         """Constructor
 
         Args:
@@ -154,6 +154,8 @@ class GenotypeCalls:
             for toc_idx in xrange(number_toc_entries):
                 (id, offset) = struct.unpack("<hI",gtc_handle.read(6))
                 self.toc_table[id] = offset
+        if check_write_complete and not self.is_write_complete():
+            raise Exception("GTC file is incomplete")
     
     def __get_generic(self, toc_entry, parse_function):
         """Internal helper function to access a data element in a
@@ -1032,7 +1034,11 @@ def read_string(handle):
         partial_length = ord(struct.unpack("c", handle.read(1))[0])
         num_bytes += 1
     total_length += partial_length << ( 7 * num_bytes)
-    return handle.read(total_length)
+    result = handle.read(total_length)
+    if len(result) < total_length:
+        raise Exception("Failed to read complete string")
+    else:
+        return result
 
 def read_scanner_data(handle):
     """Helper function to parse ScannerData object from file handle. 

@@ -25,7 +25,7 @@
 ##    of the authors and should not be interpreted as representing official policies,
 ##    either expressed or implied, of the FreeBSD Project.
 
-__version__ = "1.1.1"
+__version__ = "1.2.0"
 import struct
 from numpy import cos, sin, pi, arctan2, float32, uint16, int32, seterr, frombuffer, dtype
 seterr(divide='ignore', invalid='ignore')

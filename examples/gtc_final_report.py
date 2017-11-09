@@ -13,14 +13,14 @@ parser.add_argument("output_file", help="Location to write report")
 
 args = parser.parse_args()
 
+if os.path.isfile(args.output_file):
+    sys.stderr.write("Output file already exists, please delete and re-run\n")
+    sys.exit(-1)
+
 try:
     manifest = BeadPoolManifest(args.manifest)
 except:
     sys.stderr.write("Failed to read data from manifest\n")
-    sys.exit(-1)
-
-if os.path.isfile(args.output_file):
-    sys.stderr.write("Output file already exists, please delete and re-run\n")
     sys.exit(-1)
 
 with open(args.output_file, "w") as output_handle:

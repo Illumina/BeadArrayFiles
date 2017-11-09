@@ -18,8 +18,6 @@ After unpacking the installation package, run the setup.py script supplying the 
 
 >python setup.py install
 
-If the user prefers not to use the python distutils framework, it is also possible to copy the IlluminaBeadArrayFiles.py source file into a location referenced by the PYTHONPATH environment variable.
-
 ## Dependencies
 The library depends on the availability of the numpy package in the python installation (http://www.numpy.org/)
 
@@ -60,13 +58,24 @@ Class to encapsulate the meta-data collected in the GTC file for a scanner instr
 ### BeadPoolManifest
 Class for parsing a binary (BPM) manifest file. This class can be used to recover the in-order list of loci names in a given manifest, which is necessary to associate the genotype information present in the GTC file to a specific locus name. 
 
+### RefStrand, SourceStrand
+Represents different strand conventions in manifest
+
+### BeadPoolManifest
+Read information from a binary BPM file
+
+### LocusAggregate
+Aggregate information across many samples for a given loci
+
+### ClusterFile
+Read information from a binary EGT file
 
 ## Compatibility
 This library is compatible with Python 2.7 and was tested with Python 2.7.11
 
 ## License
 
->Copyright (c) 2016, Illumina
+>Copyright (c) 2017, Illumina
 > All rights reserved.
 >
 > Redistribution and use in source and binary forms, with or without

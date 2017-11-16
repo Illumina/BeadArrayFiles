@@ -40,9 +40,9 @@ class Loader(object):
         locus_aggregate.scores = sample_data.get_genotype_scores(
             locus_offset, loci_buffer_size)
         locus_aggregate.b_allele_freqs = sample_data.get_ballele_freqs(
-            locus_offset, loci_buffer_size)
+            locus_offset, loci_buffer_size) if sample_data.version >= 4 else [None] * loci_buffer_size
         locus_aggregate.log_r_ratios = sample_data.get_logr_ratios(
-            locus_offset, loci_buffer_size)
+            locus_offset, loci_buffer_size) if sample_data.version >= 4 else [None] * loci_buffer_size
         locus_aggregate.x_intensities = sample_data.get_raw_x_intensities(
             locus_offset, loci_buffer_size)
         locus_aggregate.y_intensities = sample_data.get_raw_y_intensities(

@@ -25,7 +25,7 @@
 # of the authors and should not be interpreted as representing official policies,
 # either expressed or implied, of the FreeBSD Project.
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 from .GenotypeCalls import code2genotype, NC, AA, AB, BB, GenotypeCalls, NormalizationTransform, ScannerData
 from .BeadPoolManifest import RefStrand, SourceStrand, BeadPoolManifest
 from .LocusAggregate import LocusAggregate

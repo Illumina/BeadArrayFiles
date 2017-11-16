@@ -24,7 +24,8 @@ class Loader(object):
     def __call__(self, sample_data):
         """
         Based on the configuration of the Loader function, load a slice of loci data
-        from the given sample.
+        from the given sample. If the sample data is not version 4 or above, the log_r_ratios
+        and b_allele_freqs will be populated with an array of "None"
 
         Args:
             sample_data (GenotypeCalls): The sample data to provide loci information
@@ -40,9 +41,9 @@ class Loader(object):
         locus_aggregate.scores = sample_data.get_genotype_scores(
             locus_offset, loci_buffer_size)
         locus_aggregate.b_allele_freqs = sample_data.get_ballele_freqs(
-            locus_offset, loci_buffer_size)
+            locus_offset, loci_buffer_size) if sample_data.version >= 4 else [None] * loci_buffer_size
         locus_aggregate.log_r_ratios = sample_data.get_logr_ratios(
-            locus_offset, loci_buffer_size)
+            locus_offset, loci_buffer_size) if sample_data.version >= 4 else [None] * loci_buffer_size
         locus_aggregate.x_intensities = sample_data.get_raw_x_intensities(
             locus_offset, loci_buffer_size)
         locus_aggregate.y_intensities = sample_data.get_raw_y_intensities(

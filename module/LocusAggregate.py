@@ -24,7 +24,8 @@ class Loader(object):
     def __call__(self, sample_data):
         """
         Based on the configuration of the Loader function, load a slice of loci data
-        from the given sample.
+        from the given sample. If the sample data is not version 4 or above, the log_r_ratios
+        and b_allele_freqs will be populated with an array of "None"
 
         Args:
             sample_data (GenotypeCalls): The sample data to provide loci information

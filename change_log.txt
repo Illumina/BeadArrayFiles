@@ -1,3 +1,6 @@
+1.3.1
+  -Support for version 3 GTC files during locus aggregation
+
 1.3.0
   -Added new function to assist with aggregation of information across samples for loci (see LocusAggregate)
   -Added new class to parse binary EGT files

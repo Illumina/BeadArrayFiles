@@ -1,6 +1,6 @@
 import struct
 from numpy import cos, sin, pi, arctan2, float32, uint16, int32, seterr, frombuffer, dtype
-from .BeadArrayUtility import read_int, read_string, read_byte, read_float, complement
+from .BeadArrayUtility import read_int, read_string, read_byte, read_float, read_char, complement
 from .BeadPoolManifest import RefStrand, SourceStrand
 
 seterr(divide='ignore', invalid='ignore')

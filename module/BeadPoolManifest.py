@@ -59,7 +59,7 @@ class BeadPoolManifest(object):
             Exception: Manifest format error
         """
         with open(manifest_file, "rb") as manifest_handle:
-            header = manifest_handle.read(3)
+            header = manifest_handle.read(3).decode('utf-8')
             if len(header) != 3 or header != "BPM":
                 raise Exception("Invalid BPM format")
             version = read_byte(manifest_handle)
@@ -82,11 +82,11 @@ class BeadPoolManifest(object):
             self.num_loci = read_int(manifest_handle)
             manifest_handle.seek(4 * self.num_loci, 1)
             name_lookup = {}
-            for idx in xrange(self.num_loci):
+            for idx in range(self.num_loci):
                 self.names.append(read_string(manifest_handle))
                 name_lookup[self.names[-1]] = idx
 
-            for idx in xrange(self.num_loci):
+            for idx in range(self.num_loci):
                 normalization_id = read_byte(manifest_handle)
                 if normalization_id >= 100:
                     raise Exception(
@@ -100,7 +100,7 @@ class BeadPoolManifest(object):
             self.map_infos = [0] * self.num_loci
             self.ref_strands = [RefStrand.Unknown] * self.num_loci
             self.source_strands = [SourceStrand.Unknown] * self.num_loci
-            for idx in xrange(self.num_loci):
+            for idx in range(self.num_loci):
                 locus_entry = LocusEntry(manifest_handle)
                 self.assay_types[name_lookup[locus_entry.name]] = locus_entry.assay_type
                 self.addresses[name_lookup[locus_entry.name]] = locus_entry.address_a
@@ -115,13 +115,13 @@ class BeadPoolManifest(object):
                     "Manifest format error: read invalid number of assay entries")
 
             all_norm_ids = set()
-            for locus_idx in xrange(self.num_loci):
+            for locus_idx in range(self.num_loci):
                 self.normalization_ids[locus_idx] += 100 * \
                     self.assay_types[locus_idx]
                 all_norm_ids.add(self.normalization_ids[locus_idx])
             sorted_norm_ids = sorted(all_norm_ids)
             lookup_dictionary = {}
-            for idx in xrange(len(sorted_norm_ids)):
+            for idx in range(len(sorted_norm_ids)):
                 lookup_dictionary[sorted_norm_ids[idx]] = idx
             self.normalization_lookups = [
                 lookup_dictionary[normalization_id] for normalization_id in self.normalization_ids]
@@ -179,6 +179,7 @@ class SourceStrand(object):
             raise ValueError(
                 "Unexpected value for source strand " + source_strand)
 
+
 class RefStrand(object):
     Unknown = 0
     Plus = 1
@@ -230,6 +231,7 @@ class RefStrand(object):
         else:
             raise ValueError(
                 "Unexpected value for reference strand " + ref_strand)
+
 
 class LocusEntry(object):
     """
@@ -309,21 +311,21 @@ class LocusEntry(object):
         self.source_strand = SourceStrand.from_string(
             self.ilmn_id.split("_")[-2])
         self.name = read_string(handle)
-        for idx in xrange(3):
+        for idx in range(3):
             read_string(handle)
         handle.read(4)
-        for idx in xrange(2):
+        for idx in range(2):
             read_string(handle)
         self.snp = read_string(handle)
         self.chrom = read_string(handle)
-        for idx in xrange(2):
+        for idx in range(2):
             read_string(handle)
         self.map_info = int(read_string(handle))
-        for idx in xrange(2):
+        for idx in range(2):
             read_string(handle)
         self.address_a = read_int(handle)
         self.address_b = read_int(handle)
-        for idx in xrange(7):
+        for idx in range(7):
             read_string(handle)
         handle.read(3)
         self.assay_type = read_byte(handle)

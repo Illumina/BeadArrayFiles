@@ -1,4 +1,5 @@
-from itertools import imap
+from builtins import map
+
 
 class Loader(object):
     """
@@ -103,6 +104,7 @@ class GenerateLocusAggregate(object):
                 sample_buffer.transforms[relative_locus_idx])
         return locus_aggregate
 
+
 class LocusAggregate(object):
     """
     Class to contain aggregated data for a single locus
@@ -197,8 +199,8 @@ class LocusAggregate(object):
                 samples, loci_group[0], loci_group[-1] - loci_group[0] + 1, normalization_lookups)
 
             # generate corresponding locus aggregates
-            aggregates = imap(GenerateLocusAggregate(
+            aggregates = map(GenerateLocusAggregate(
                 buffer, loci_group[0]), loci_group)
 
-            for result in imap(callback, aggregates):
+            for result in map(callback, aggregates):
                 yield result

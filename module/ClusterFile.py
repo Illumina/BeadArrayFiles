@@ -1,5 +1,6 @@
-from itertools import izip
+from builtins import zip
 from .BeadArrayUtility import read_int, read_string, read_byte, read_float
+
 
 class ClusterFile(object):
     """
@@ -76,7 +77,7 @@ class ClusterFile(object):
             list(value): A list of type value returned by read_record function
         """
         result = []
-        for idx in xrange(num_entries):
+        for idx in range(num_entries):
             result.append(read_record(handle))
         return result
 
@@ -86,7 +87,7 @@ class ClusterFile(object):
         Read a cluster file
 
         Args:
-            file: EGT cluster file handle
+            handle: EGT cluster file handle
 
         Returns:
             ClusterFile
@@ -134,7 +135,7 @@ class ClusterFile(object):
 
         # cluster counts
         cluster_counts = []
-        for idx in xrange(num_records):
+        for idx in range(num_records):
             # 3 corresponds to number genotypes (AA, AB, BB)
             cluster_counts.append(ClusterFile.read_array(handle, 3, read_int))
 
@@ -143,12 +144,13 @@ class ClusterFile(object):
             assert cluster_record.ab_cluster_stats.N == count_record[1]
             assert cluster_record.bb_cluster_stats.N == count_record[2]
 
-        for (locus_name, address, cluster_record, cluster_score) in izip(loci_names, addresses, cluster_records, cluster_scores):
+        for (locus_name, address, cluster_record, cluster_score) in zip(loci_names, addresses, cluster_records, cluster_scores):
             cluster_record.address = address
             cluster_record.cluster_score = cluster_score
             result.add_record(locus_name, cluster_record)
 
         return result
+
 
 class ClusterRecord(object):
     """
@@ -220,7 +222,7 @@ class ClusterRecord(object):
                 "Unsupported cluster record version " + str(version))
 
         # read through unused fields
-        for idx in xrange(14):
+        for idx in range(14):
             _ = read_float(handle)
 
         aa_cluster_stats = ClusterStats(

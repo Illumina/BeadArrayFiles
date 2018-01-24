@@ -115,7 +115,7 @@ class GenotypeCalls(object):
         """
         self.filename = filename
         with open(self.filename, "rb") as gtc_handle:
-            identifier = gtc_handle.read(3)
+            identifier = gtc_handle.read(3).decode('utf-8')
             if identifier != "gtc":
                 raise Exception("GTC format error: bad format identifier")
             self.version = read_byte(gtc_handle)
@@ -129,7 +129,7 @@ class GenotypeCalls(object):
             # to the lookup
             #
             self.toc_table = {}
-            for toc_idx in xrange(number_toc_entries):
+            for toc_idx in range(number_toc_entries):
                 (id, offset) = struct.unpack("<hI", gtc_handle.read(6))
                 self.toc_table[id] = offset
         if check_write_complete and not self.is_write_complete():
@@ -177,7 +177,7 @@ class GenotypeCalls(object):
                 gtc_handle.seek(
                     self.toc_table[toc_entry] + 4 + offset * item_size)
             result = []
-            for idx in xrange(num_entries):
+            for idx in range(num_entries):
                 result.append(parse_function(gtc_handle))
             return result
 
@@ -334,7 +334,8 @@ class GenotypeCalls(object):
             ab_genotype = code2genotype[genotype]
             a_nucleotide = snp[1]
             b_nucleotide = snp[-2]
-            if a_nucleotide == "N" or b_nucleotide == "N" or strand_annotation == unknown_annotation or ab_genotype == "NC" or ab_genotype == "NULL":
+            if a_nucleotide == "N" or b_nucleotide == "N" \
+                    or strand_annotation == unknown_annotation or ab_genotype == "NC" or ab_genotype == "NULL":
                 result.append("-")
             else:
                 report_strand_nucleotides = []
@@ -393,11 +394,11 @@ class GenotypeCalls(object):
             gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_BASE_CALLS])
             num_entries = read_int(gtc_handle)
             result = []
-            for idx in xrange(num_entries):
+            for idx in range(num_entries):
                 if ploidy_type == 1:
-                    result.append(gtc_handle.read(2))
+                    result.append(gtc_handle.read(2).decode('utf-8'))
                 else:
-                    byte_string = gtc_handle.read(2)
+                    byte_string = gtc_handle.read(2).decode('utf-8')
                     ab_genotype = code2genotype[genotypes[idx]]
                     if ab_genotype == "NC" or ab_genotype == "NULL":
                         result.append("-")
@@ -541,11 +542,10 @@ class GenotypeCalls(object):
         if self.version < 5:
             raise Exception(
                 "Percentile intensities unavailable in GTC File version (" + str(self.version) + ")")
-        result = []
         with open(self.filename, "rb") as gtc_handle:
             gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_PERCENTILES_X])
             result = []
-            for idx in xrange(3):
+            for idx in range(3):
                 result.append(read_ushort(gtc_handle))
             return result
 
@@ -558,11 +558,10 @@ class GenotypeCalls(object):
         if self.version < 5:
             raise Exception(
                 "Percentile intensities unavailable in GTC File version (" + str(self.version) + ")")
-        result = []
         with open(self.filename, "rb") as gtc_handle:
             gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_PERCENTILES_Y])
             result = []
-            for idx in xrange(3):
+            for idx in range(3):
                 result.append(read_ushort(gtc_handle))
             return result
 
@@ -591,9 +590,6 @@ class GenotypeCalls(object):
         """
         Check for last item written to GTC file to verify that write
         has successfully completed
-
-        Args:
-            None
 
         Returns:
             bool: Whether or not write is complete
@@ -647,10 +643,10 @@ class NormalizationTransform:
         Returns:
             NormalizationTransform object
         """
-        return NormalizationTransform(handle.read(52))
+        return NormalizationTransform(handle.read(52).decode('utf-8'))
 
     @staticmethod
-    def rect_to_polar((x, y)):
+    def rect_to_polar(x, y):
         """
         Converts normalized x,y intensities to (pseudo) polar co-ordinates (R, theta)
 
@@ -661,8 +657,8 @@ class NormalizationTransform:
             (float, float): (R,theta) polar values as tuple of floats
         """
         if x == 0 and y == 0:
-            return (nan, nan)
-        return (x + y, arctan2(y, x) * 2.0 / pi)
+            return nan, nan
+        return x + y, arctan2(y, x) * 2.0 / pi
 
     def normalize_intensities(self, x, y, threshold=True):
         """
@@ -676,7 +672,7 @@ class NormalizationTransform:
             (float, float): (xn, yn) normalized intensities as tuple of floats
         """
         if x <= 0 and y <= 0:
-            return (nan, nan)
+            return nan, nan
 
         tempx = x - self.offset_x
         tempy = y - self.offset_y
@@ -694,7 +690,7 @@ class NormalizationTransform:
             xn = 0 if 0 > xn else xn
             yn = 0 if 0 > yn else yn
 
-        return (xn, yn)
+        return xn, yn
 
 
 class ScannerData(object):

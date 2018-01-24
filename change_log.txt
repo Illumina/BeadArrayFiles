@@ -1,3 +1,6 @@
+1.3.3
+  - Added in backwards compatible support for python 3
+
 1.3.2
   -Address missing import of functions
 

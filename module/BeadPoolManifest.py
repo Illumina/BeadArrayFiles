@@ -118,9 +118,8 @@ class BeadPoolManifest(object):
             for locus_idx in xrange(self.num_loci):
                 self.normalization_ids[locus_idx] += 100 * \
                     self.assay_types[locus_idx]
-                # To mimic with byte-wrapping behavior from GenomeStudio, AutoCall, IAAP
-                if self.normalization_ids[locus_idx] >= 256:
-                   self.normalization_ids[locus_idx] -= 256
+                # To mimic the byte-wrapping behavior from GenomeStudio, AutoCall, IAAP take the mod of 256
+                self.normalization_ids[locus_idx] %= 256
                 all_norm_ids.add(self.normalization_ids[locus_idx])
             sorted_norm_ids = sorted(all_norm_ids)
             lookup_dictionary = {}

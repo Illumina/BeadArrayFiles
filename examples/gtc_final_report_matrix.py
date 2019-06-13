@@ -29,20 +29,21 @@ def build_dict(matrix = None, samplename = None, names = None, genotypes = None,
     return matrix
 
 delim = "\t"
-NUM_ARGUMENTS = 6
+NUM_ARGUMENTS = 5
 
 parser = argparse.ArgumentParser("Generate a final matrix report by specifying the report strand from a directory of GTC files")
 parser.add_argument("manifest", help="BPM manifest file")
 parser.add_argument("gtc_directory", help="Directory containing GTC files")
 parser.add_argument("output_file", help="Location to write report")
-parser.add_argument("--forward", help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --forward 1; print matrix with forward alleles")
-parser.add_argument("--forward_GC", help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --forward_GC 1; print matrix with forward alleles including genotype scores")
-parser.add_argument("--top", help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --top 1; print matrix with top alleles")
-parser.add_argument("--top_GC", help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --top_GC 1; print matrix with top alleles including genotype scores")
-parser.add_argument("--AB", help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --forward 1; print matrix with forward alleles")
-parser.add_argument("--AB_GC", help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --forward_GC 1; print matrix with forward alleles including genotype scores")
-parser.add_argument("--plus", help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --top 1; print matrix with top alleles")
-parser.add_argument("--plus_GC", help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --top_GC 1; print matrix with top alleles including genotype scores")
+parser.add_argument("--forward", action="store_true", default=False, help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --forward - print matrix with forward alleles")
+parser.add_argument("--forward_GC", action="store_true", default=False, help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --forward_GC - print matrix with forward alleles including genotype scores")
+parser.add_argument("--top", action="store_true", default=False, help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --top - print matrix with top alleles")
+parser.add_argument("--top_GC", action="store_true", default=False, help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --top_GC - print matrix with top alleles including genotype scores")
+parser.add_argument("--AB", action="store_true", default=False, help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --forward - print matrix with forward alleles")
+parser.add_argument("--AB_GC", action="store_true", default=False, help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --forward_GC - print matrix with forward alleles including genotype scores")
+parser.add_argument("--plus", action="store_true", default=False, help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --top - print matrix with top alleles")
+parser.add_argument("--plus_GC", action="store_true", default=False, help="python gtc_final_report_matrix.py <path_to_manifest> <path_to_gtc_directory> <path_to_output_file> --top_GC - print matrix with top alleles including genotype scores")
+
 
 args = parser.parse_args()
 

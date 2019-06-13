@@ -333,23 +333,22 @@ class GenotypeCalls(object):
         if len(genotypes) != len(strand_annotations):
             raise ValueError(
                 "The number of reference strand annotations must match the number of loci in the GTC file")
-        
         result = []
-        for (genotype, snp, strand_annotation) in zip(genotypes, snps, strand_annotations):
-            ab_genotype = code2genotype[genotype]
-            a_nucleotide = snp[1]
-            b_nucleotide = snp[-2]
-            if a_nucleotide == "N" or b_nucleotide == "N" or strand_annotation == unknown_annotation or ab_genotype == "NC" or ab_genotype == "NULL":
-                result.append("-")
-            else:
-                report_strand_nucleotides = []
-                for ab_allele in ab_genotype:
-                    nucleotide_allele = a_nucleotide if ab_allele == "A" else b_nucleotide
-                    for report_strand in report_strands:
+        for report_strand in report_strands:
+            for (genotype, snp, strand_annotation) in zip(genotypes, snps, strand_annotations):
+                ab_genotype = code2genotype[genotype]
+                a_nucleotide = snp[1]
+                b_nucleotide = snp[-2]
+                if a_nucleotide == "N" or b_nucleotide == "N" or strand_annotation == unknown_annotation or ab_genotype == "NC" or ab_genotype == "NULL":
+                    result.append("-")
+                else:
+                    report_strand_nucleotides = []
+                    for ab_allele in ab_genotype:
+                        nucleotide_allele = a_nucleotide if ab_allele == "A" else b_nucleotide
                         report_strand_nucleotides.append(
-                            nucleotide_allele if strand_annotation == report_strand else complement(nucleotide_allele)
-                            )
-                result.append("".join(report_strand_nucleotides))
+                                nucleotide_allele if strand_annotation == report_strand else complement(nucleotide_allele)
+                                )
+                    result.append("".join(report_strand_nucleotides))
         return result
 
     def get_base_calls_plus_strand(self, snps, ref_strand_annotations):

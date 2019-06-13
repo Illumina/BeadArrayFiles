@@ -189,8 +189,8 @@ class IlmnStrand(object):
     Unknown = 0
     TOP = 1
     BOT = 2
-    PLUS = 1
-    MINUS = 2
+    PLUS = 3
+    MINUS = 4
 
     @staticmethod
     def to_string(ilmn_strand):
@@ -234,7 +234,7 @@ class IlmnStrand(object):
         Raises:
             ValueError: Unexpected value for Illumina strand
         """
-        if ilmn_strand == "U" or ilmn_strand == "":
+        if ilmn_strand == "U":
             return IlmnStrand.Unknown
         if ilmn_strand == "T":
             return IlmnStrand.TOP

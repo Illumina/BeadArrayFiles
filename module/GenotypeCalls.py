@@ -320,15 +320,20 @@ class GenotypeCalls(object):
         Raises:
             ValueError: Number of SNPs or ref strand annotations not matched to entries in GTC file
         """
+        if type(report_strand) != list:
+            report_strands = [report_strand]
+        else:
+            report_strands = report_strand
+        
         genotypes = self.get_genotypes()
         if len(genotypes) != len(snps):
             raise ValueError(
                 "The number of SNPs must match the number of loci in the GTC file")
-
+        
         if len(genotypes) != len(strand_annotations):
             raise ValueError(
                 "The number of reference strand annotations must match the number of loci in the GTC file")
-
+        
         result = []
         for (genotype, snp, strand_annotation) in zip(genotypes, snps, strand_annotations):
             ab_genotype = code2genotype[genotype]
@@ -340,8 +345,10 @@ class GenotypeCalls(object):
                 report_strand_nucleotides = []
                 for ab_allele in ab_genotype:
                     nucleotide_allele = a_nucleotide if ab_allele == "A" else b_nucleotide
-                    report_strand_nucleotides.append(
-                        nucleotide_allele if strand_annotation == report_strand else complement(nucleotide_allele))
+                    for report_strand in report_strands:
+                        report_strand_nucleotides.append(
+                            nucleotide_allele if strand_annotation == report_strand else complement(nucleotide_allele)
+                            )
                 result.append("".join(report_strand_nucleotides))
         return result
 
@@ -386,7 +393,7 @@ class GenotypeCalls(object):
             The genotype basecalls on the report strand as a list of strings.
             The characters are A, C, G, T, or - for a no-call/null.
         """
-        return self.get_base_calls_generic(snps, ilmn_strand_annotations, IlmnStrand.TOP, RefStrand.Unknown)
+        return self.get_base_calls_generic(snps, ilmn_strand_annotations, [IlmnStrand.TOP, IlmnStrand.PLUS], IlmnStrand.Unknown)
 
     def get_base_calls(self):
         """

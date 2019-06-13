@@ -2,7 +2,7 @@ import sys
 import argparse
 import os
 from datetime import datetime
-from IlluminaBeadArrayFiles import GenotypeCalls, BeadPoolManifest, code2genotype
+from IlluminaBeadArrayFiles import BeadPoolManifest, GenotypeCalls, code2genotype
 
 delim = "\t"
 
@@ -18,7 +18,7 @@ if os.path.isfile(args.output_file):
     sys.exit(-1)
 
 try:
-    manifest = BeadPoolManifest(args.manifest)
+    manifest = BeadPoolManifest.BeadPoolManifest(args.manifest)
 except:
     sys.stderr.write("Failed to read data from manifest\n")
     sys.exit(-1)
@@ -39,15 +39,17 @@ with open(args.output_file, "w") as output_handle:
     output_handle.write(delim.join(["Total Samples", str(len(samples))]) + "\n")
 
     output_handle.write("[Data]\n")
-    output_handle.write(delim.join(["SNP Name", "Sample ID", "Chr", "MapInfo", "Alleles - AB", "Alleles - Plus", "Alleles - Forward"]) + "\n")
+    output_handle.write(delim.join(["SNP Name", "Sample ID", "Chr", "MapInfo", "Alleles - AB", "Alleles - Plus", "Alleles - Forward", "Alleles - TOP", "Genotype Score"]) + "\n")
     for gtc_file in samples:
         sys.stderr.write("Processing " + gtc_file + "\n")
         gtc_file = os.path.join(args.gtc_directory, gtc_file)
-        gtc = GenotypeCalls(gtc_file)
+        gtc = GenotypeCalls.GenotypeCalls(gtc_file)
         genotypes = gtc.get_genotypes()
         plus_strand_genotypes = gtc.get_base_calls_plus_strand(manifest.snps, manifest.ref_strands)
         forward_strand_genotypes = gtc.get_base_calls_forward_strand(manifest.snps, manifest.source_strands)
+        top_strand_genotypes = gtc.get_base_calls_TOP_strand(manifest.snps, manifest.ilmn_strands)
+        genotype_scores = gtc.get_genotype_scores()
 
         assert len(genotypes) == len(manifest.names)
-        for (name, chrom, map_info, genotype, ref_strand_genotype, source_strand_genotype) in zip(manifest.names, manifest.chroms, manifest.map_infos, genotypes, plus_strand_genotypes, forward_strand_genotypes):
-            output_handle.write(delim.join([name, os.path.basename(gtc_file)[:-4], chrom, str(map_info), code2genotype[genotype], ref_strand_genotype, source_strand_genotype]) + "\n")
+        for (name, chrom, map_info, genotype, ref_strand_genotype, source_strand_genotype, ilmn_strand_genotype, genotype_score) in zip(manifest.names, manifest.chroms, manifest.map_infos, genotypes, plus_strand_genotypes, forward_strand_genotypes, top_strand_genotypes, genotype_scores):
+            output_handle.write(delim.join([name, os.path.basename(gtc_file)[:-4], chrom, str(map_info), code2genotype[genotype], ref_strand_genotype, source_strand_genotype, ilmn_strand_genotype, str(genotype_score)]) + "\n")

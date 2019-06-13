@@ -1,5 +1,6 @@
 from .BeadArrayUtility import read_int, read_string, read_byte
 
+
 class BeadPoolManifest(object):
     """
     Class for parsing binary (BPM) manifest file.
@@ -14,6 +15,7 @@ class BeadPoolManifest(object):
                                          list of normalization transforms read from GTC file
         ref_strands (list(int)): Reference strand annotation for loci (see RefStrand class)
         source_strands (list(int)): Source strand annotations for loci (see SourceStrand class)
+        ilmn_strands  (list(int)): Ilumina strand annotations for loci (see IlmnStrand class)
         num_loci (int): Number of loci in manifest
         manifest_name (string): Name of manifest
         control_config (string): Control description from manifest
@@ -39,6 +41,7 @@ class BeadPoolManifest(object):
         self.normalization_lookups = []
         self.ref_strands = []
         self.source_strands = []
+        self.ilmn_strands = []
         self.num_loci = 0
         self.manifest_name = ""
         self.control_config = ""
@@ -100,6 +103,7 @@ class BeadPoolManifest(object):
             self.map_infos = [0] * self.num_loci
             self.ref_strands = [RefStrand.Unknown] * self.num_loci
             self.source_strands = [SourceStrand.Unknown] * self.num_loci
+            self.ilmn_strands = [IlmnStrand.Unknown] * self.num_loci
             for idx in xrange(self.num_loci):
                 locus_entry = LocusEntry(manifest_handle)
                 self.assay_types[name_lookup[locus_entry.name]] = locus_entry.assay_type
@@ -109,6 +113,7 @@ class BeadPoolManifest(object):
                 self.map_infos[name_lookup[locus_entry.name]] = locus_entry.map_info
                 self.ref_strands[name_lookup[locus_entry.name]] = locus_entry.ref_strand
                 self.source_strands[name_lookup[locus_entry.name]] = locus_entry.source_strand
+                self.ilmn_strands[name_lookup[locus_entry.name]] = locus_entry.ilmn_strand
 
             if len(self.normalization_ids) != len(self.assay_types):
                 raise Exception(
@@ -179,6 +184,71 @@ class SourceStrand(object):
             raise ValueError(
                 "Unexpected value for source strand " + source_strand)
 
+
+class IlmnStrand(object):
+    Unknown = 0
+    TOP = 1
+    BOT = 2
+    PLUS = 1
+    MINUS = 2
+
+    @staticmethod
+    def to_string(ilmn_strand):
+        """Get an integer representation of Illumina strand annotation
+        
+        Args:
+            ilmn_strand (str) : string representation of Illumina strand annotation (e.g., "T")
+            
+        Returns:
+            int : int representation of Illumina strand annotation (e.g. IlmnStrand.TOP)
+        
+        Raises:
+            ValueError: Unexpected value for Illumina strand
+        """
+        if ilmn_strand == IlmnStrand.Unknown:
+            return "U"
+        elif ilmn_strand == IlmnStrand.TOP:
+            return "T"
+        elif ilmn_strand == IlmnStrand.BOT:
+            return "B"
+        elif ilmn_strand == IlmnStrand.PLUS:
+            return "P"
+        elif ilmn_strand == IlmnStrand.MINUS:
+            return "M"
+        
+        else:
+            raise ValueError(
+                "Unexpected value for ilmn strand " + ilmn_strand)
+
+    @staticmethod
+    def from_string(ilmn_strand):
+        """
+        Get a string representation of Illumina strand annotation
+        
+        Args:
+            ilmn_strand (int) : int representation of Illumina strand (e.g., IlmnStrand.TOP)
+        
+        Returns:
+            str : string representation of Illumina strand annotation
+        
+        Raises:
+            ValueError: Unexpected value for Illumina strand
+        """
+        if ilmn_strand == "U" or ilmn_strand == "":
+            return IlmnStrand.Unknown
+        if ilmn_strand == "T":
+            return IlmnStrand.TOP
+        elif ilmn_strand == "B":
+            return IlmnStrand.BOT
+        if ilmn_strand == "P":
+            return IlmnStrand.PLUS
+        elif ilmn_strand == "M":
+            return IlmnStrand.MINUS
+        else:
+            raise ValueError(
+                "Unexpected value for ilmn strand " + ilmn_strand)
+
+
 class RefStrand(object):
     Unknown = 0
     Plus = 1
@@ -188,13 +258,13 @@ class RefStrand(object):
     def to_string(ref_strand):
         """
         Get a string reprensetation of ref strand annotation
-
+        
         Args:
             ref_strand (int) : int representation of ref strand (e.g., RefStrand.Plus)
-
+        
         Returns:
             str : string representation of reference strand annotation
-
+        
         Raises:
             ValueError: Unexpected value for reference strand
         """
@@ -211,13 +281,13 @@ class RefStrand(object):
     @staticmethod
     def from_string(ref_strand):
         """Get an integer representation of ref strand annotation
-
+        
         Args:
             ref_strand (str) : string representation of reference strand annotation (e.g., "+")
-
+        
         Returns:
             int : int representation of reference strand annotation (e.g. RefStrand.Plus)
-
+        
         Raises:
             ValueError: Unexpected value for reference strand
         """
@@ -235,7 +305,7 @@ class LocusEntry(object):
     """
     Helper class representing a locus entry within a bead pool manifest. Current only support version
     6,7, and 8.
-
+    
     Attributes:
         ilmn_id (string) : IlmnID (probe identifier) of locus
         name (string): Name (variant identifier) of locus
@@ -247,6 +317,7 @@ class LocusEntry(object):
         address_b (int) : AddressB ID of locus (0 if none)
         ref_strand (int) : See RefStrand class
         source_strand (int) : See SourceStrand class
+        ilmn_strand (int) : See IlmnStrand class
     """
 
     def __init__(self, handle):
@@ -269,6 +340,7 @@ class LocusEntry(object):
         self.address_b = -1
         self.ref_strand = RefStrand.Unknown
         self.source_strand = SourceStrand.Unknown
+        self.ilmn_strand = IlmnStrand.Unknown
         self.__parse_file(handle)
 
     def __parse_file(self, handle):
@@ -308,6 +380,8 @@ class LocusEntry(object):
         self.ilmn_id = read_string(handle)
         self.source_strand = SourceStrand.from_string(
             self.ilmn_id.split("_")[-2])
+        self.ilmn_strand = IlmnStrand.from_string(
+            self.ilmn_id.split("_")[-3])
         self.name = read_string(handle)
         for idx in xrange(3):
             read_string(handle)

@@ -1,7 +1,7 @@
 import struct
 from numpy import cos, sin, pi, arctan2, float32, uint16, int32, seterr, frombuffer, dtype
 from .BeadArrayUtility import read_int, read_string, read_byte, read_float, read_char, read_ushort, complement
-from .BeadPoolManifest import RefStrand, SourceStrand
+from .BeadPoolManifest import RefStrand, SourceStrand, IlmnStrand
 
 seterr(divide='ignore', invalid='ignore')
 nan = float32('nan')
@@ -373,6 +373,20 @@ class GenotypeCalls(object):
             The characters are A, C, G, T, or - for a no-call/null.
         """
         return self.get_base_calls_generic(snps, forward_strand_annotations, SourceStrand.Forward, RefStrand.Unknown)
+
+    def get_base_calls_TOP_strand(self, snps, ilmn_strand_annotations):
+        """
+        Get base calls on the Illumina strand.
+
+        Args:
+            snps (list(string)) : A list of string representing the snp on the design strand for the loci (e.g. [A/C])
+            ilmn_strand_annotations (list(int)) : A list of strand annotations for the loci (e.g., IlmnStrand.TOP)
+
+        Returns:
+            The genotype basecalls on the report strand as a list of strings.
+            The characters are A, C, G, T, or - for a no-call/null.
+        """
+        return self.get_base_calls_generic(snps, ilmn_strand_annotations, IlmnStrand.TOP, RefStrand.Unknown)
 
     def get_base_calls(self):
         """

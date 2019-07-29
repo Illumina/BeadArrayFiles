@@ -1,7 +1,7 @@
 import struct
 from numpy import cos, sin, pi, arctan2, float32, uint16, int32, seterr, frombuffer, dtype
 from .BeadArrayUtility import read_int, read_string, read_byte, read_float, read_char, read_ushort, complement
-from .BeadPoolManifest import RefStrand, SourceStrand
+from .BeadPoolManifest import RefStrand, SourceStrand, IlmnStrand
 
 seterr(divide='ignore', invalid='ignore')
 nan = float32('nan')
@@ -320,29 +320,35 @@ class GenotypeCalls(object):
         Raises:
             ValueError: Number of SNPs or ref strand annotations not matched to entries in GTC file
         """
+        if type(report_strand) != list:
+            report_strands = [report_strand]
+        else:
+            report_strands = report_strand
+        
         genotypes = self.get_genotypes()
         if len(genotypes) != len(snps):
             raise ValueError(
                 "The number of SNPs must match the number of loci in the GTC file")
-
+        
         if len(genotypes) != len(strand_annotations):
             raise ValueError(
                 "The number of reference strand annotations must match the number of loci in the GTC file")
-
         result = []
-        for (genotype, snp, strand_annotation) in zip(genotypes, snps, strand_annotations):
-            ab_genotype = code2genotype[genotype]
-            a_nucleotide = snp[1]
-            b_nucleotide = snp[-2]
-            if a_nucleotide == "N" or b_nucleotide == "N" or strand_annotation == unknown_annotation or ab_genotype == "NC" or ab_genotype == "NULL":
-                result.append("-")
-            else:
-                report_strand_nucleotides = []
-                for ab_allele in ab_genotype:
-                    nucleotide_allele = a_nucleotide if ab_allele == "A" else b_nucleotide
-                    report_strand_nucleotides.append(
-                        nucleotide_allele if strand_annotation == report_strand else complement(nucleotide_allele))
-                result.append("".join(report_strand_nucleotides))
+        for report_strand in report_strands:
+            for (genotype, snp, strand_annotation) in zip(genotypes, snps, strand_annotations):
+                ab_genotype = code2genotype[genotype]
+                a_nucleotide = snp[1]
+                b_nucleotide = snp[-2]
+                if a_nucleotide == "N" or b_nucleotide == "N" or strand_annotation == unknown_annotation or ab_genotype == "NC" or ab_genotype == "NULL":
+                    result.append("-")
+                else:
+                    report_strand_nucleotides = []
+                    for ab_allele in ab_genotype:
+                        nucleotide_allele = a_nucleotide if ab_allele == "A" else b_nucleotide
+                        report_strand_nucleotides.append(
+                                nucleotide_allele if strand_annotation == report_strand else complement(nucleotide_allele)
+                                )
+                    result.append("".join(report_strand_nucleotides))
         return result
 
     def get_base_calls_plus_strand(self, snps, ref_strand_annotations):
@@ -373,6 +379,20 @@ class GenotypeCalls(object):
             The characters are A, C, G, T, or - for a no-call/null.
         """
         return self.get_base_calls_generic(snps, forward_strand_annotations, SourceStrand.Forward, RefStrand.Unknown)
+
+    def get_base_calls_TOP_strand(self, snps, ilmn_strand_annotations):
+        """
+        Get base calls on the Illumina strand.
+
+        Args:
+            snps (list(string)) : A list of string representing the snp on the design strand for the loci (e.g. [A/C])
+            ilmn_strand_annotations (list(int)) : A list of strand annotations for the loci (e.g., IlmnStrand.TOP)
+
+        Returns:
+            The genotype basecalls on the report strand as a list of strings.
+            The characters are A, C, G, T, or - for a no-call/null.
+        """
+        return self.get_base_calls_generic(snps, ilmn_strand_annotations, [IlmnStrand.TOP, IlmnStrand.PLUS], IlmnStrand.Unknown)
 
     def get_base_calls(self):
         """

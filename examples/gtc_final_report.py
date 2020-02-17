@@ -39,7 +39,7 @@ with open(args.output_file, "w") as output_handle:
     output_handle.write(delim.join(["Total Samples", str(len(samples))]) + "\n")
 
     output_handle.write("[Data]\n")
-    output_handle.write(delim.join(["SNP Name", "Sample ID", "Chr", "MapInfo", "Alleles - AB", "Alleles - Plus", "Alleles - Forward"]) + "\n")
+    output_handle.write(delim.join(["SNP Name", "Sample ID", "Chr", "MapInfo", "Alleles - AB", "Alleles - Plus", "Alleles - Forward", "X",	"Y"]) + "\n")
     for gtc_file in samples:
         sys.stderr.write("Processing " + gtc_file + "\n")
         gtc_file = os.path.join(args.gtc_directory, gtc_file)
@@ -47,7 +47,8 @@ with open(args.output_file, "w") as output_handle:
         genotypes = gtc.get_genotypes()
         plus_strand_genotypes = gtc.get_base_calls_plus_strand(manifest.snps, manifest.ref_strands)
         forward_strand_genotypes = gtc.get_base_calls_forward_strand(manifest.snps, manifest.source_strands)
+        normalized_intensities = gtc.get_normalized_intensities(manifest.normalization_lookups)
 
         assert len(genotypes) == len(manifest.names)
-        for (name, chrom, map_info, genotype, ref_strand_genotype, source_strand_genotype) in zip(manifest.names, manifest.chroms, manifest.map_infos, genotypes, plus_strand_genotypes, forward_strand_genotypes):
-            output_handle.write(delim.join([name, os.path.basename(gtc_file)[:-4], chrom, str(map_info), code2genotype[genotype], ref_strand_genotype, source_strand_genotype]) + "\n")
+        for (name, chrom, map_info, genotype, ref_strand_genotype, source_strand_genotype, (x_norm, y_norm)) in zip(manifest.names, manifest.chroms, manifest.map_infos, genotypes, plus_strand_genotypes, forward_strand_genotypes, normalized_intensities):
+            output_handle.write(delim.join([name, os.path.basename(gtc_file)[:-4], chrom, str(map_info), code2genotype[genotype], ref_strand_genotype, source_strand_genotype, str(x_norm), str(y_norm)]) + "\n")

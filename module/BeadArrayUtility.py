@@ -103,6 +103,7 @@ def read_string(handle):
         num_bytes += 1
     total_length += partial_length << (7 * num_bytes)
     result = handle.read(total_length)
+    result = result.decode("utf-8")
     if len(result) < total_length:
         raise Exception("Failed to read complete string")
     else:

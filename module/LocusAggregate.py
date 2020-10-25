@@ -1,5 +1,3 @@
-from itertools import imap
-
 class Loader(object):
     """
     A function object which handles loading a contiguous slice of loci
@@ -20,6 +18,7 @@ class Loader(object):
         self.locus_offset = locus_offset
         self.loci_buffer_size = loci_buffer_size
         self.normalization_lookups = normalization_lookups
+
 
     def __call__(self, sample_data):
         """
@@ -80,7 +79,7 @@ class GenerateLocusAggregate(object):
 
         Args:
             locus_idx (int): Global locus index (will be automatically adjusted by relative offset in constructor)
-        
+
         Returns:
             LocusAggregate : Data for a single locus aggregated across all samples
         """
@@ -189,16 +188,17 @@ class LocusAggregate(object):
             Result of callback function
         """
         # figure out how many loci to load at once
-        loci_batch_size = int(bin_size / float(len(samples))) + 1
+        loci_batch_size = int(bin_size / float(len(list(samples)))) + 1
 
         for loci_group in LocusAggregate.group_loci(loci, loci_batch_size):
+
             # read in the buffer for this group of loci
             buffer = LocusAggregate.load_buffer(
                 samples, loci_group[0], loci_group[-1] - loci_group[0] + 1, normalization_lookups)
 
             # generate corresponding locus aggregates
-            aggregates = imap(GenerateLocusAggregate(
+            aggregates = map(GenerateLocusAggregate(
                 buffer, loci_group[0]), loci_group)
 
-            for result in imap(callback, aggregates):
+            for result in map(callback, aggregates):
                 yield result

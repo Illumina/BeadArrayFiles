@@ -116,6 +116,7 @@ class GenotypeCalls(object):
         self.filename = filename
         with open(self.filename, "rb") as gtc_handle:
             identifier = gtc_handle.read(3)
+            identifier = identifier.decode("utf-8")
             if identifier != "gtc":
                 raise Exception("GTC format error: bad format identifier")
             self.version = read_byte(gtc_handle)
@@ -129,7 +130,7 @@ class GenotypeCalls(object):
             # to the lookup
             #
             self.toc_table = {}
-            for toc_idx in xrange(number_toc_entries):
+            for toc_idx in range(number_toc_entries):
                 (id, offset) = struct.unpack("<hI", gtc_handle.read(6))
                 self.toc_table[id] = offset
         if check_write_complete and not self.is_write_complete():
@@ -177,7 +178,7 @@ class GenotypeCalls(object):
                 gtc_handle.seek(
                     self.toc_table[toc_entry] + 4 + offset * item_size)
             result = []
-            for idx in xrange(num_entries):
+            for idx in range(num_entries):
                 result.append(parse_function(gtc_handle))
             return result
 
@@ -393,7 +394,7 @@ class GenotypeCalls(object):
             gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_BASE_CALLS])
             num_entries = read_int(gtc_handle)
             result = []
-            for idx in xrange(num_entries):
+            for idx in range(num_entries):
                 if ploidy_type == 1:
                     result.append(gtc_handle.read(2))
                 else:
@@ -545,7 +546,7 @@ class GenotypeCalls(object):
         with open(self.filename, "rb") as gtc_handle:
             gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_PERCENTILES_X])
             result = []
-            for idx in xrange(3):
+            for idx in range(3):
                 result.append(read_ushort(gtc_handle))
             return result
 
@@ -562,7 +563,7 @@ class GenotypeCalls(object):
         with open(self.filename, "rb") as gtc_handle:
             gtc_handle.seek(self.toc_table[GenotypeCalls.__ID_PERCENTILES_Y])
             result = []
-            for idx in xrange(3):
+            for idx in range(3):
                 result.append(read_ushort(gtc_handle))
             return result
 
@@ -650,7 +651,7 @@ class NormalizationTransform:
         return NormalizationTransform(handle.read(52))
 
     @staticmethod
-    def rect_to_polar((x, y)):
+    def rect_to_polar(x, y):
         """
         Converts normalized x,y intensities to (pseudo) polar co-ordinates (R, theta)
 

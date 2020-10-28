@@ -8,6 +8,8 @@ If you have intensity data files (IDATs) for which GTC files are not currentty a
 & "C:\Program Files\Illumina\AutoConvert 2.0\AutoConvert.exe" path_to_idat_folder path_to_output_folder manifest_file egt_file
 ```
 
+You can also use a newer, cross-platform CLI (Win10, OSX, Linux) to achieve the same functionality: https://support.illumina.com/downloads/iaap-genotyping-cli.html
+
 ## Build instructions
 The IlluminaBeadArrayFiles repository supports building a package with the python distutils module (https://docs.python.org/2/distutils/setupscript.html). To build a source distribution, run the included setup.py script supplying the "sdist" command
 
@@ -23,16 +25,21 @@ The library depends on the availability of the numpy package in the python insta
 
 ## Example usage
 
-> from IlluminaBeadArrayFiles import GenotypeCalls, BeadPoolManifest, code2genotype  
-> import sys  
-> gtc_file = "path_to_genotypes.gtc"  
-> manifest_file = "path_to_manifest.bpm"  
-> names = BeadPoolManifest( manifest_file ).names  
-> genotypes = GenotypeCalls( gtc_file ).get_genotypes()     
-> for (locus, genotype) in zip( names, genotypes ):  
+> from IlluminaBeadArrayFiles import GenotypeCalls, BeadPoolManifest, code2genotype
+> import sys
+> gtc_file = "path_to_genotypes.gtc"
+> manifest_file = "path_to_manifest.bpm"
+> names = BeadPoolManifest( manifest_file ).names
+> genotypes = GenotypeCalls( gtc_file ).get_genotypes()
+> for (locus, genotype) in zip( names, genotypes ):
 > &nbsp;&nbsp;sys.stdout.write( locus + "," + code2genotype[genotype] + "\n" )
 
-Also, see examples/gtc_final_report.py for an additional example of usage. 
+Also, see examples/* for additional examples of usage.
+These scripts are based on common Genome Studio (https://support.illumina.com/array/array_software/genomestudio.html) reports.
+
+**NOTE:**
+For the DNA summary report, it does not exclude zeroed loci from the cluster file as it does in Genome Studio, so overall call rates may look lower.
+There is an open issue to address this: https://github.com/Illumina/BeadArrayFiles/issues/22
 
 ## GTC File Format
 The specification for the GTC file format is provided in docs/GTC_File_Format_v5.pdf
@@ -56,7 +63,7 @@ Class to encapsulate a normalization transform for conversion of raw intensity d
 Class to encapsulate the meta-data collected in the GTC file for a scanner instrument
 
 ### BeadPoolManifest
-Class for parsing a binary (BPM) manifest file. This class can be used to recover the in-order list of loci names in a given manifest, which is necessary to associate the genotype information present in the GTC file to a specific locus name. 
+Class for parsing a binary (BPM) manifest file. This class can be used to recover the in-order list of loci names in a given manifest, which is necessary to associate the genotype information present in the GTC file to a specific locus name.
 
 ### RefStrand, SourceStrand
 Represents different strand conventions in manifest
@@ -71,11 +78,11 @@ Aggregate information across many samples for a given loci
 Read information from a binary EGT file
 
 ## Compatibility
-This library is compatible with Python 2.7 and was tested with Python 2.7.11
+This library is compatible with Python 3 and was tested with Python 3.8.5
 
 ## License
 
->Copyright (c) 2017, Illumina
+>Copyright (c) 2020, Illumina
 > All rights reserved.
 >
 > Redistribution and use in source and binary forms, with or without
@@ -101,7 +108,4 @@ This library is compatible with Python 2.7 and was tested with Python 2.7.11
 >The views and conclusions contained in the software and documentation are those
 >of the authors and should not be interpreted as representing official policies,
 >either expressed or implied, of the FreeBSD Project.
-
-
-
 

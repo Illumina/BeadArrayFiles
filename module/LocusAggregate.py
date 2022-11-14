@@ -193,8 +193,8 @@ class LocusAggregate(object):
         for loci_group in LocusAggregate.group_loci(loci, loci_batch_size):
 
             # read in the buffer for this group of loci
-            buffer = LocusAggregate.load_buffer(
-                samples, loci_group[0], loci_group[-1] - loci_group[0] + 1, normalization_lookups)
+            buffer = list(LocusAggregate.load_buffer(
+                samples, loci_group[0], loci_group[-1] - loci_group[0] + 1, normalization_lookups))
 
             # generate corresponding locus aggregates
             aggregates = map(GenerateLocusAggregate(

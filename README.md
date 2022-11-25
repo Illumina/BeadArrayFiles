@@ -25,14 +25,21 @@ The library depends on the availability of the numpy package in the python insta
 
 ## Example usage
 
-> from IlluminaBeadArrayFiles import GenotypeCalls, BeadPoolManifest, code2genotype
-> import sys
-> gtc_file = "path_to_genotypes.gtc"
-> manifest_file = "path_to_manifest.bpm"
-> names = BeadPoolManifest( manifest_file ).names
-> genotypes = GenotypeCalls( gtc_file ).get_genotypes()
-> for (locus, genotype) in zip( names, genotypes ):
-> &nbsp;&nbsp;sys.stdout.write( locus + "," + code2genotype[genotype] + "\n" )
+```python
+from IlluminaBeadArrayFiles import GenotypeCalls, BeadPoolManifest, code2genotype
+
+gtc_file = "path_to_genotypes.gtc"
+manifest_file = "path_to_manifest.bpm"
+names = BeadPoolManifest( manifest_file ).names
+genotypes = GenotypeCalls( gtc_file ).get_genotypes()
+
+c = 0  # a counter to only show the first 10 genotypes
+for (locus, genotype) in zip( names, genotypes ):
+    print( locus + "," + code2genotype[genotype] )
+    if c >= 10:
+        break
+    c += 1
+```
 
 Also, see examples/* for additional examples of usage.
 These scripts are based on common Genome Studio (https://support.illumina.com/array/array_software/genomestudio.html) reports.

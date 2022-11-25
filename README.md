@@ -26,8 +26,6 @@ The library depends on the availability of the numpy package in the python insta
 ## Example usage
 
 ```python
-import sys
-
 from IlluminaBeadArrayFiles import GenotypeCalls, BeadPoolManifest, code2genotype
 
 gtc_file = "path_to_genotypes.gtc"

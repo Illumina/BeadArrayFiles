@@ -12,7 +12,9 @@ parser.add_argument("cluster", help="EGT cluster file")
 parser.add_argument("gtc_directory", help="Directory containing GTC files")
 parser.add_argument("samplesheet", help="Genome Studio formatted samplesheet to pull Sample_ID and Sample_Name")
 parser.add_argument("output_file", help="Location to write report")
-
+parser.add_argument("--exclude-samples", dest="exclude_samples", default=[], nargs="*", help="List of sample names to exclude (optional)")
+parser.add_argument("--gc-cutoff", dest="gc_cutoff", type=float, default=0.15, help="GenCall score cutoff to set GT/GC scores to 0")
+parser.add_argument("--exclude-zeroed-snps", dest="exclude_zeroed_snps", action="store_true", default=False, help="Exclude SNPs with a cluster total score of 0.")
 args = parser.parse_args()
 
 if os.path.isfile(args.output_file):
@@ -72,12 +74,20 @@ with open(args.output_file, "w") as output_handle:
             sys.exit(-1)
         gtc_file = os.path.join(args.gtc_directory, gtc_file)
         gtc = GenotypeCalls(gtc_file)
+        if sample_name in args.exclude_samples:
+            continue
         top_strand_genotypes = gtc.get_base_calls()
         gc_scores = gtc.get_genotype_scores()
 
         assert len(top_strand_genotypes) == len(manifest.names)
         for (name, genotype, score) in zip(manifest.names, top_strand_genotypes, gc_scores):
+            if args.exclude_zeroed_snps and egt.get_record(name).cluster_score.total_score == 0.0:
+                continue
             top_allele1, top_allele2 = genotype.decode('ascii')
-            gc_score = '{:.4f}'.format(round(score, 4))
-            gt_score = '{:.4f}'.format(round(egt.get_record(name).cluster_score.total_score, 4))
+
+            gc_score = '{:.4f}'.format(0)
+            gt_score = '{:.4f}'.format(0)
+            if score >= args.gc_cutoff:
+                gc_score = '{:.4f}'.format(round(score, 4))
+                gt_score = '{:.4f}'.format(round(egt.get_record(name).cluster_score.total_score, 4))
             output_handle.write(delim.join([sample_id, sample_name, name, top_allele1, top_allele2, gc_score, gt_score]) + "\n")

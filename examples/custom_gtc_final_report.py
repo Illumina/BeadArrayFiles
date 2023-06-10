@@ -67,12 +67,9 @@ with open(args.output_file, "w") as output_handle:
             sys.exit(-1)
         gtc_file = os.path.join(args.gtc_directory, gtc_file)
         gtc = GenotypeCalls(gtc_file)
-        genotypes = gtc.get_genotypes()
         top_strand_genotypes = gtc.get_base_calls()
-        # plus_strand_genotypes = gtc.get_base_calls_plus_strand(manifest.snps, manifest.ref_strands)
-        # forward_strand_genotypes = gtc.get_base_calls_forward_strand(manifest.snps, manifest.source_strands)
-        # normalized_intensities = gtc.get_normalized_intensities(manifest.normalization_lookups)
 
-        assert len(genotypes) == len(manifest.names)
+        assert len(top_strand_genotypes) == len(manifest.names)
         for (name, genotype) in zip(manifest.names, top_strand_genotypes):
-            output_handle.write(delim.join([sample_id, sample_name, name, code2genotype[genotype][0], code2genotype[genotype][1]]) + "\n")
+            top_allele1, top_allele2 = genotype.decode('ascii')
+            output_handle.write(delim.join([sample_id, sample_name, name, top_allele1, top_allele2]) + "\n")

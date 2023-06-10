@@ -2,12 +2,13 @@ import sys
 import argparse
 import os
 from datetime import datetime
-from IlluminaBeadArrayFiles import GenotypeCalls, BeadPoolManifest, code2genotype
+from IlluminaBeadArrayFiles import GenotypeCalls, BeadPoolManifest, ClusterFile
 
 delim = "\t"
 
 parser = argparse.ArgumentParser("Generate a final report from a directory of GTC files")
 parser.add_argument("manifest", help="BPM manifest file")
+parser.add_argument("cluster", help="EGT cluster file")
 parser.add_argument("gtc_directory", help="Directory containing GTC files")
 parser.add_argument("samplesheet", help="Genome Studio formatted samplesheet to pull Sample_ID and Sample_Name")
 parser.add_argument("output_file", help="Location to write report")
@@ -17,6 +18,9 @@ args = parser.parse_args()
 if os.path.isfile(args.output_file):
     sys.stderr.write("Output file already exists, please delete and re-run\n")
     sys.exit(-1)
+
+with open(args.cluster, "rb") as cluster_handle:
+    egt = ClusterFile.read_cluster_file(cluster_handle)
 
 try:
     manifest = BeadPoolManifest(args.manifest)
@@ -63,13 +67,14 @@ with open(args.output_file, "w") as output_handle:
         try:
             (sample_id, sample_name) = sample_map[sample]
         except:
-            sys.stderr.write("Failed to find: "+sample+"in the samplesheet.\n")
+            sys.stderr.write("Failed to find: "+sample+" in the samplesheet.\n")
             sys.exit(-1)
         gtc_file = os.path.join(args.gtc_directory, gtc_file)
         gtc = GenotypeCalls(gtc_file)
         top_strand_genotypes = gtc.get_base_calls()
+        gc_scores = gtc.get_genotype_scores()
 
         assert len(top_strand_genotypes) == len(manifest.names)
-        for (name, genotype) in zip(manifest.names, top_strand_genotypes):
+        for (name, genotype, score) in zip(manifest.names, top_strand_genotypes, gc_scores):
             top_allele1, top_allele2 = genotype.decode('ascii')
-            output_handle.write(delim.join([sample_id, sample_name, name, top_allele1, top_allele2]) + "\n")
+            output_handle.write(delim.join([sample_id, sample_name, name, top_allele1, top_allele2, str(score), str(egt.get_record(name).cluster_score.total_score)]) + "\n")

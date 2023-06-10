@@ -2,7 +2,7 @@ import sys
 import argparse
 import os
 from datetime import datetime
-from IlluminaBeadArrayFiles import GenotypeCalls, BeadPoolManifest, ClusterFile
+from IlluminaBeadArrayFiles import GenotypeCalls, BeadPoolManifest, ClusterFile, __version__
 
 delim = "\t"
 
@@ -41,11 +41,12 @@ try:
             (sample_id, sample_name, sentrix_barcode, sentrix_position, _) = line.split(',')
             sample_map[sentrix_barcode+'_'+sentrix_position] = (sample_id, sample_name)
 except:
-    sys.stderr.write("Failed to read data from the samplesheet, is it formatted correctly with a [Data] section?\n")
+    sys.stderr.write("Failed to read data from the samplesheet, is it formatted correctly with a Sample_ID column in the header?\n")
     sys.exit(-1)
 
 with open(args.output_file, "w") as output_handle:
     output_handle.write("[Header]\n")
+    output_handle.write(delim.join(["BeadArrayFiles Version", __version__])+ "\n")
     output_handle.write(delim.join(["Processing Date", datetime.now().strftime("%m/%d/%Y %I:%M %p")])+ "\n")
     output_handle.write(delim.join(["Content", os.path.basename(args.manifest)]) + "\n")
     output_handle.write(delim.join(["Num SNPs", str(len(manifest.names))]) + "\n")
@@ -77,4 +78,6 @@ with open(args.output_file, "w") as output_handle:
         assert len(top_strand_genotypes) == len(manifest.names)
         for (name, genotype, score) in zip(manifest.names, top_strand_genotypes, gc_scores):
             top_allele1, top_allele2 = genotype.decode('ascii')
-            output_handle.write(delim.join([sample_id, sample_name, name, top_allele1, top_allele2, str(score), str(egt.get_record(name).cluster_score.total_score)]) + "\n")
+            gc_score = '{:.4f}'.format(round(score, 4))
+            gt_score = '{:.4f}'.format(round(egt.get_record(name).cluster_score.total_score, 4))
+            output_handle.write(delim.join([sample_id, sample_name, name, top_allele1, top_allele2, gc_score, gt_score]) + "\n")

@@ -51,7 +51,10 @@ with open(args.output_file, "w") as output_handle:
     output_handle.write(delim.join(["BeadArrayFiles Version", __version__])+ "\n")
     output_handle.write(delim.join(["Processing Date", datetime.now().strftime("%m/%d/%Y %I:%M %p")])+ "\n")
     output_handle.write(delim.join(["Content", os.path.basename(args.manifest)]) + "\n")
-    output_handle.write(delim.join(["Num SNPs", str(len(manifest.names))]) + "\n")
+    num_snp = str(len(manifest.names))
+    if args.exclude_zeroed_snps:
+        num_snps = str(len([name for name in manifest.names if egt.get_record(name).cluster_score.total_score > 0.0]))
+    output_handle.write(delim.join(["Num SNPs", num_snps]) + "\n")
     output_handle.write(delim.join(["Total SNPs", str(len(manifest.names))]) + "\n")
 
     samples = []
@@ -59,7 +62,10 @@ with open(args.output_file, "w") as output_handle:
         if gtc_file.lower().endswith(".gtc"):
             samples.append(gtc_file)
 
-    output_handle.write(delim.join(["Num Samples", str(len(samples))]) + "\n")
+    num_samples = str(len(samples))
+    if args.exclude_samples:
+        num_samples = str(len(samples) - len(args.exclude_samples))
+    output_handle.write(delim.join(["Num Samples", num_samples]) + "\n")
     output_handle.write(delim.join(["Total Samples", str(len(samples))]) + "\n")
 
     output_handle.write("[Data]\n")
@@ -72,10 +78,10 @@ with open(args.output_file, "w") as output_handle:
         except:
             sys.stderr.write("Failed to find: "+sample+" in the samplesheet.\n")
             sys.exit(-1)
-        gtc_file = os.path.join(args.gtc_directory, gtc_file)
-        gtc = GenotypeCalls(gtc_file)
         if sample_name in args.exclude_samples:
             continue
+        gtc_file = os.path.join(args.gtc_directory, gtc_file)
+        gtc = GenotypeCalls(gtc_file)
         top_strand_genotypes = gtc.get_base_calls()
         gc_scores = gtc.get_genotype_scores()
 

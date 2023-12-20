@@ -113,9 +113,6 @@ class ClusterFile(object):
         result = ClusterFile(gencall_version, cluster_version, call_version,
                              normalization_version, date_created, manifest_name)
         data_block_version = read_int(handle)
-        if data_block_version not in [8, 9]:
-            raise Exception("Data block version in cluster file " +
-                            str(data_block_version) + " not  supported")
         # opa
         _ = read_string(handle)
 
@@ -211,16 +208,25 @@ class ClusterRecord(object):
 
         if version == 9:
             intensity_threshold = read_float(handle)
-        elif version == 8:
-            _ = read_float(handle)
+
+            # read through unused fields
+            for idx in range(14):
+                _ = read_float(handle)
+        elif version >= 6:
             intensity_threshold = 0
+
+            # read through unused fields
+            for idx in range(15):
+                _ = read_float(handle)
+        elif version < 5:
+            intensity_threshold = 0
+
+            # read through unused fields
+            _ = read_float(handle)
+            _ = read_float(handle)
         else:
             raise Exception(
                 "Unsupported cluster record version " + str(version))
-
-        # read through unused fields
-        for idx in range(14):
-            _ = read_float(handle)
 
         aa_cluster_stats = ClusterStats(
             aa_theta_mean, aa_theta_dev, aa_r_mean, aa_r_dev, aa_n)

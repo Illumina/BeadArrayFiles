@@ -1,3 +1,8 @@
+1.3.4
+  -Fix for empty LocusAggregates. See issue #31 (https://github.com/Illumina/BeadArrayFiles/issues/31)
+  -Added Dockerfile to be used with ICA pipelines
+  -Added more support to read clusterfiles of different versions
+
 1.3.3
   -Updated to python3
   -Added GenomeStudio-style dna_report to examples

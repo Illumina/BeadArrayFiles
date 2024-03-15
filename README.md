@@ -2,7 +2,7 @@
 Library to parse binary file formats related to Illumina bead arrays. The IlluminaBeadArrayFiles library provides a parser to extract information from these binary files.
 
 ## Generating GTC files
-If you have intensity data files (IDATs) for which GTC files are not currently available, it is possible to generate these files using illumina software. We recommend using [DRAGEN Array](https://support.illumina.com/array/array_software/dragen-array-secondary-analysis.html).
+If you have intensity data files (IDATs) for which GTC files are not currently available, it is possible to generate these files using Illumina software. We recommend using [DRAGEN Array](https://support.illumina.com/array/array_software/dragen-array-secondary-analysis.html).
 
 ## Build instructions
 The IlluminaBeadArrayFiles repository supports building a package with the python distutils module (https://docs.python.org/2/distutils/setupscript.html). To build a source distribution, run the included setup.py script supplying the "sdist" command

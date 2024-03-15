@@ -1,14 +1,8 @@
 # IlluminaBeadArrayFiles
-Library to parse file formats related to Illumina bead arrays. GTC files are produced by the AutoConvert and AutoCall softwares and contain genotyping (and other) information encoded in a binary format. The IlluminaBeadArrayFiles library provides a parser to extract information from these binary files.
+Library to parse binary file formats related to Illumina bead arrays. The IlluminaBeadArrayFiles library provides a parser to extract information from these binary files.
 
 ## Generating GTC files
-If you have intensity data files (IDATs) for which GTC files are not currentty available, it is possible to manually generate these files with either the Beeline or AutoConvert software (https://support.illumina.com/array/array_software/beeline/downloads.html). Beeline provides a graphical user interface for the creation of GTC files, while AutoConvert allows GTC files to be generated from the command-line,  as shown below
-
-```PowerShell
-& "C:\Program Files\Illumina\AutoConvert 2.0\AutoConvert.exe" path_to_idat_folder path_to_output_folder manifest_file egt_file
-```
-
-You can also use a newer, cross-platform CLI (Win10, OSX, Linux) to achieve the same functionality: https://support.illumina.com/downloads/iaap-genotyping-cli.html
+If you have intensity data files (IDATs) for which GTC files are not currently available, it is possible to generate these files using Illumina software. We recommend using [DRAGEN Array](https://support.illumina.com/array/array_software/dragen-array-secondary-analysis.html).
 
 ## Build instructions
 The IlluminaBeadArrayFiles repository supports building a package with the python distutils module (https://docs.python.org/2/distutils/setupscript.html). To build a source distribution, run the included setup.py script supplying the "sdist" command

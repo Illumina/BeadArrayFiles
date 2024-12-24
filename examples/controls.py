@@ -46,9 +46,9 @@ with open(args.output_file, 'w') as output_handle:
     control_offset = 0
     for control_data in controls:
         beadtypes, category, color, control = control_data.split(',')
-        # assumes all same beadtype
-        beadtype = beadtypes.split(':')[0]
-        for sample in samples:
+        # assumes all same beadtype, converts to int then back to str to trim off preceeding zeroes
+        beadtype = str(int(beadtypes.split(':')[0]))
+        for sample in sorted(samples):
             output_handle.write(','.join([category, control, beadtype, sample, sample]))
             controls_x = samples[sample]['controls_x'][control_offset:control_offset + num_sections]
             controls_y = samples[sample]['controls_y'][control_offset:control_offset + num_sections]

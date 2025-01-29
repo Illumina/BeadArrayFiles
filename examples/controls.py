@@ -36,13 +36,13 @@ with open(args.output_file, 'w') as output_handle:
             base, ext = os.path.splitext(filename)
             samples[base] = {'gtc': filename}
     for sample in samples:
-        sys.stderr.write('Processing ' + sample + '\n')
+        sys.stdout.write('Processing ' + sample + '\n')
         gtc = GenotypeCalls(os.path.join(args.gtc_directory, samples[sample]['gtc']))
         samples[sample]['controls_x'] = gtc.get_control_x_intensities()
         samples[sample]['controls_y'] = gtc.get_control_y_intensities()
 
     # Write out controls in genome studio "ControlDashboard.csv" format
-    sys.stderr.write(f'Writing to {args.output_file}\n')
+    sys.stdout.write(f'Writing to {args.output_file}\n')
     control_offset = 0
     for control_data in controls:
         beadtypes, category, color, control = control_data.split(',')

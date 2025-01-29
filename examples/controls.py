@@ -18,6 +18,8 @@ except:
 
 with open(args.output_file, 'w') as output_handle:
     # Write header and grab control_config from manifest
+    # Sample_ID and Sentrix_Label may differ from the genome studio report
+    # as we're just using the Sentrix_Label for both in this script
     output_handle.write(','.join(['Category','Control','BeadType','Sample_ID','Sentrix_Label']))
     controls = manifest.control_config.split('\n')
     # Trim empty control if exists
